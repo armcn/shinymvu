@@ -1,0 +1,28 @@
+Package: shinymvu
+Title: The Elm Architecture for Shiny Applications
+Version: 0.1.0
+Authors@R: 
+    person("shinymvu authors", role = c("aut", "cre"),
+           email = "shinymvu@example.com")
+Description: Implements the Model-View-Update (MVU) pattern, also known as
+    The Elm Architecture (TEA), for Shiny applications using Alpine.js as
+    the client-side rendering engine. Provides a reactive runtime loop
+    where the user defines three pure functions (init, update, view) and
+    the package handles all WebSocket plumbing. Includes enum-based message
+    types with exhaustive pattern matching, declarative input helpers, Shiny
+    module support, and testing utilities for pure update functions.
+License: MIT + file LICENSE
+URL: https://github.com/shinymvu/shinymvu
+BugReports: https://github.com/shinymvu/shinymvu/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: 
+    bslib,
+    htmltools,
+    jsonlite,
+    rlang,
+    shiny (>= 1.7.0)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
