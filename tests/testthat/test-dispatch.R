@@ -115,3 +115,62 @@ test_that("mvu_dispatch propagates errors from update", {
     "update error"
   )
 })
+
+# --- Effects collection -----------------------------------------------------
+
+test_that("mvu_dispatch handles mvu_result return values", {
+  update <- function(model, msg, value) {
+    switch(msg,
+      increment = list_set(model, count = model$count + 1),
+      save = mvu_result(model, effect_notify("Saved!")),
+      model
+    )
+  }
+  result <- mvu_dispatch(
+    init = list(count = 0),
+    update = update,
+    messages = list("increment", "save")
+  )
+  expect_equal(result$count, 1)
+})
+
+test_that("mvu_dispatch collects effects when requested", {
+  update <- function(model, msg, value) {
+    switch(msg,
+      increment = list_set(model, count = model$count + 1),
+      save = mvu_result(model, effect_notify("Saved!")),
+      reset = mvu_result(
+        list_set(model, count = 0),
+        effect_notify("Reset!"),
+        effect_send("analytics", list(event = "reset"))
+      ),
+      model
+    )
+  }
+  result <- mvu_dispatch(
+    init = list(count = 0),
+    update = update,
+    messages = list("increment", "save", "reset"),
+    .collect_effects = TRUE
+  )
+  expect_equal(result$model$count, 0)
+  expect_length(result$effects, 3)
+  expect_equal(result$effects[[1]]$kind, "notify")
+  expect_equal(result$effects[[1]]$text, "Saved!")
+  expect_equal(result$effects[[2]]$kind, "notify")
+  expect_equal(result$effects[[3]]$kind, "send")
+})
+
+test_that("mvu_dispatch with .collect_effects=TRUE and no effects returns empty list", {
+  update <- function(model, msg, value) {
+    list_set(model, count = model$count + 1)
+  }
+  result <- mvu_dispatch(
+    init = list(count = 0),
+    update = update,
+    messages = list("increment"),
+    .collect_effects = TRUE
+  )
+  expect_equal(result$model$count, 1)
+  expect_length(result$effects, 0)
+})

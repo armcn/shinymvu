@@ -52,7 +52,7 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
 #' @param id The module ID string (must match the `id` in [mvu_module_ui()]).
 #' @param init A function returning the initial model.
 #' @param update A function with signature `function(model, msg, value)` that
-#'   returns a new model.
+#'   returns a new model or an [mvu_result()].
 #' @param msg An optional enum factory created by [mvu_enum()]. See
 #'   [mvu_server()] for details.
 #' @param to_frontend A function with signature `function(model)` that
@@ -60,17 +60,20 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
 #'   Defaults to [identity()].
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument in [mvu_module_ui()].
-#' @param on_msg Optional message hook. See [mvu_server()] for details.
+#' @param on_msg `r lifecycle::badge("deprecated")` Optional message hook.
+#'   See [mvu_server()] for details.
+#' @param devtools Logical. When `TRUE`, records transitions. See
+#'   [mvu_server()] for details on the changed return type.
 #'
-#' @return The model `reactiveVal`, returned from the module.
+#' @return See [mvu_server()] — the model `reactiveVal` (default) or a list
+#'   with `$model` and `$log` when `devtools = TRUE`.
 #'
 #' @examples
 #' \dontrun{
 #' server <- function(input, output, session) {
 #'   mvu_module_server("counter",
 #'     init = function() list(count = 0),
-#'     update = function(model, msg, value) model,
-#'     to_frontend = function(model) model  # or omit to send model as-is
+#'     update = function(model, msg, value) model
 #'   )
 #' }
 #' }
@@ -78,13 +81,15 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
 #' @export
 mvu_module_server <- function(id, init, update, msg = NULL,
                               to_frontend = identity,
-                              component = "mvu", on_msg = NULL) {
+                              component = "mvu", on_msg = NULL,
+                              devtools = FALSE) {
   moduleServer(id, function(input, output, session) {
     comp_id <- session$ns(component)
     mvu_server(
       init = init, update = update, msg = msg,
       to_frontend = to_frontend,
       component = component, on_msg = on_msg,
+      devtools = devtools,
       input = input, output = output, session = session,
       .channel_component = comp_id
     )

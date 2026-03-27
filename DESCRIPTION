@@ -1,6 +1,6 @@
 Package: shinymvu
 Title: The Elm Architecture for Shiny Applications
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("shinymvu authors", role = c("aut", "cre"),
            email = "shinymvu@example.com")
