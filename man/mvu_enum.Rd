@@ -20,7 +20,7 @@ define the set of valid message types for your application, ensuring that
 only known messages are dispatched.
 }
 \examples{
-Msg <- mvu_enum(c("increment", "decrement", "reset"))
-Msg("increment")
+check_msg <- mvu_enum(c("increment", "decrement", "reset"))
+check_msg("increment")
 
 }

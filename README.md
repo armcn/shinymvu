@@ -1,11 +1,118 @@
 # shinymvu
 
-The Elm Architecture for Shiny Applications.
+Predictable state management for Shiny.
 
-**shinymvu** implements the Model-View-Update (MVU) pattern for
-[Shiny](https://shiny.posit.co/) using [Alpine.js](https://alpinejs.dev/)
-as the client-side rendering engine. Define three pure functions -- `init`,
-`update`, `view` -- and the package handles all the reactive plumbing.
+If you've built complex Shiny apps, you know the pain: dozens of
+`reactiveVal`s scattered across server functions, `observeEvent`s
+triggering other `observeEvent`s, and the creeping dread that changing
+one thing will break three others. The state lives everywhere and flows
+in every direction. Debugging means tracing invisible chains of
+reactivity with `browser()` calls and prayer.
+
+**shinymvu** replaces that with a single idea: your entire component
+state is one list, and there is exactly one way to change it. This
+pattern -- called Model-View-Update (MVU), originally from
+[The Elm Architecture](https://guide.elm-lang.org/architecture/) --
+has been battle-tested in frontend frameworks for years. shinymvu brings
+it to Shiny.
+
+## The pattern in 30 seconds
+
+You write two things:
+
+1. **`init`** -- a function that returns your starting state (a plain list)
+2. **`update`** -- a function that takes the current state + a message
+   and returns the new state
+
+That's it. No `reactiveVal`, no `observeEvent`, no side effects.
+The package handles the plumbing.
+
+```r
+counter_msg <- mvu_enum(c("increment", "decrement", "reset"))
+
+counter_init <- function() list(count = 0)
+
+counter_update <- function(model, msg, value = NULL) {
+  match_enum(msg,
+    "increment" ~ list_set(model, count = model$count + 1),
+    "decrement" ~ list_set(model, count = model$count - 1),
+    "reset"     ~ list_set(model, count = 0)
+  )
+}
+```
+
+The UI uses [Alpine.js](https://alpinejs.dev/) directives to read state
+and send messages -- no `renderUI`, no `uiOutput`:
+
+```r
+counter_ui <- function(id) {
+  mvu_module_ui(id,
+    div(class = "text-center py-4",
+      mvu_button("\u2212", msg = "decrement"),
+      tags$span(`x-text` = "model.count", class = "display-4 mx-3"),
+      mvu_button("+", msg = "increment"),
+      div(class = "mt-3",
+        mvu_button("Reset", msg = "reset", `x-show` = "model.count !== 0")
+      )
+    )
+  )
+}
+
+counter_server <- function(id) {
+  mvu_module_server(id,
+    init = counter_init,
+    update = counter_update,
+    msg = counter_msg
+  )
+}
+```
+
+## Why this is better for complex apps
+
+**One source of truth.** All state for a component lives in a single
+list. No hunting through server functions to find which `reactiveVal`
+holds what.
+
+**Changes are explicit.** State only changes when `update` returns a new
+list. Every possible state transition is in one function, with every
+message type enumerated. No reactive chain mysteries.
+
+**Testing without Shiny.** Because `update` is a pure function (data
+in, data out), you can test your entire app logic with plain unit tests:
+
+```r
+test_that("reset zeroes the count", {
+  result <- mvu_dispatch(
+    init = counter_init,
+    update = counter_update,
+    messages = list("increment", "increment", "reset")
+  )
+  expect_equal(result$count, 0)
+})
+```
+
+No `testServer`, no mock sessions, no flaky async timing.
+
+**Exhaustive message handling.** `mvu_enum` + `match_enum` forces you to
+handle every message type. Add a new message and forget to handle it?
+You get an error, not a silent bug.
+
+## How it works
+
+```
+Browser (Alpine.js)                    R Server
+───────────────────                    ────────
+  button click ──────────►  send("increment")
+                            Shiny.setInputValue ──────► update(model, msg, value)
+                                                              │
+                                                        new model
+  Alpine patches DOM  ◄───────────────────────────  sendCustomMessage
+```
+
+The browser side uses Alpine.js for lightweight client-side reactivity.
+When the user clicks a button, Alpine sends a message to R. The server
+runs your `update` function, gets the new state, and pushes it back.
+Alpine reactively updates the DOM. One direction, every time.
 
 ## Installation
 
@@ -14,129 +121,17 @@ as the client-side rendering engine. Define three pure functions -- `init`,
 pak::pak("shinymvu/shinymvu")
 ```
 
-## Quick Start: Counter
-
-The classic Elm counter, translated to R.
-
-```r
-library(shiny)
-library(shinymvu)
-
-# Define valid messages
-Msg <- mvu_enum(c("increment", "decrement", "reset"))
-
-# Initial model
-init <- function() list(count = 0)
-
-# Pure update function
-update <- function(model, msg, value = NULL) {
-  match_enum(Msg(msg),
-    "increment" ~ list_set(model, count = model$count + 1),
-    "decrement" ~ list_set(model, count = model$count - 1),
-    "reset"     ~ list_set(model, count = 0)
-  )
-}
-
-# Transform model for the client
-view <- function(model) {
-  list(
-    count = model$count,
-    is_zero = model$count == 0
-  )
-}
-
-# UI with Alpine.js directives
-ui <- mvu_page(
-  div(class = "container py-5 text-center",
-    tags$h1("Counter", class = "mb-4"),
-    div(class = "d-flex gap-3 justify-content-center align-items-center",
-      mvu_button("\u2212", msg = "decrement",
-        class = "btn btn-outline-primary btn-lg"),
-      tags$span(`x-text` = "model.count", class = "display-4 mx-3"),
-      mvu_button("+", msg = "increment",
-        class = "btn btn-primary btn-lg")
-    ),
-    div(class = "mt-3",
-      tags$button(
-        class = "btn btn-outline-secondary",
-        `x-show` = "!model.is_zero",
-        `@click` = "send('reset')",
-        "Reset"
-      )
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  mvu_server(
-    init = init, update = update, view = view,
-    input = input, output = output, session = session
-  )
-}
-
-shinyApp(ui, server)
-```
-
-## How It Works
-
-```
-Browser (Alpine.js)                    R Server (shinymvu)
-───────────────────                    ────────────────────
-  @click  ──────────►  send(type, value)
-                       Shiny.setInputValue ──────► mvu_server dispatcher
-                                                        │
-                                              update(model, msg, value)
-                                                        │
-                                              view(new_model)
-  Alpine patches DOM  ◄───────────────────  sendCustomMessage
-  model = data
-```
-
-1. User clicks a button wired with `@click="send('increment')"`
-2. Alpine.js calls `Shiny.setInputValue` to send the message to R
-3. `mvu_server` receives the message and calls your `update` function
-4. The new model is passed through `view` and sent back to the browser
-5. Alpine.js reactively updates the DOM
-
-## Core API
+## API reference
 
 | Function | Purpose |
 |---|---|
-| `mvu_page()` | UI wrapper with Alpine.js CDN and bridge script |
-| `mvu_server()` | Server-side reactive runtime loop |
-| `mvu_module_ui()` / `mvu_module_server()` | Shiny module support |
+| `mvu_module_ui()` / `mvu_module_server()` | Shiny module wrappers |
+| `mvu_page()` / `mvu_server()` | Standalone (non-module) app |
 | `mvu_enum()` | Define valid message types |
 | `match_enum()` | Exhaustive pattern matching on messages |
-| `list_set()` | Immutable model updates |
-| `mvu_button()` | Message-dispatching button |
-| `mvu_select()` | Message-dispatching select input |
-| `mvu_checkbox()` | Message-dispatching checkbox |
-| `mvu_slider()` | Message-dispatching range slider |
+| `list_set()` | Immutable list updates |
+| `mvu_button()`, `mvu_select()`, `mvu_checkbox()`, `mvu_slider()` | Input helpers |
 | `mvu_dispatch()` | Test helper for pure update functions |
-
-## Testing
-
-Since `update` is a pure function, testing is simple and does not require a
-running Shiny session:
-
-```r
-test_that("increment and decrement work correctly", {
-  result <- mvu_dispatch(
-    init = function() list(count = 0),
-    update = update,
-    messages = list("increment", "increment", "decrement")
-  )
-  expect_equal(result$count, 1)
-})
-```
-
-## Why No Text Input Helper?
-
-Text inputs are deliberately excluded from the input helpers. With the
-server round-trip on every keystroke, text input latency would be
-unacceptable. Instead, use Alpine.js `x-model` to bind text inputs to
-local Alpine state, then dispatch the full value on form submission or
-blur.
 
 ## License
 

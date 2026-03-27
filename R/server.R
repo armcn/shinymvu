@@ -2,16 +2,20 @@
 #'
 #' The core reactive runtime that connects the Model-View-Update cycle.
 #' Listens for messages from the Alpine.js client, passes them through the
-#' user-defined `update` function, and pushes the resulting view back to the
-#' browser via `sendCustomMessage`.
+#' user-defined `update` function, and pushes the resulting frontend model
+#' back to the browser via `sendCustomMessage`.
 #'
 #' @param init A function returning the initial model (a list).
 #' @param update A function with signature `function(model, msg, value)` that
-#'   takes the current model, a message type string, and an optional value,
-#'   and returns a new model. Must be a pure function.
-#' @param view A function with signature `function(model)` that transforms the
-#'   model into a JSON-serializable list sent to the client. Only include data
-#'   needed for rendering.
+#'   takes the current model, a message type (string or `mvu_enum`), and an
+#'   optional value, and returns a new model. Must be a pure function.
+#' @param msg An optional enum factory created by [mvu_enum()]. When
+#'   provided, incoming message type strings are automatically validated
+#'   and converted to `mvu_enum` objects before being passed to `update`.
+#' @param to_frontend A function with signature `function(model)` that
+#'   projects the server-side model into a JSON-serializable list for the
+#'   client. May include derived display values. Defaults to [identity()],
+#'   which sends the model as-is.
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument used in [mvu_page()] or
 #'   [mvu_module_ui()].
@@ -35,15 +39,14 @@
 #'   mvu_server(
 #'     init = function() list(count = 0),
 #'     update = function(model, msg, value) model,
-#'     view = function(model) model,
 #'     input = input, output = output, session = session
 #'   )
 #' }
 #' }
 #'
 #' @export
-mvu_server <- function(init, update, view, component = "mvu",
-                       on_msg = NULL, input, output, session,
+mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
+                       component = "mvu", on_msg = NULL, input, output, session,
                        .channel_component = component) {
   model_channel <- paste0(.channel_component, "__model")
   msg_input <- paste0(component, "__msg")
@@ -51,21 +54,27 @@ mvu_server <- function(init, update, view, component = "mvu",
   model <- reactiveVal(init())
 
   push <- function() {
-    session$sendCustomMessage(model_channel, view(model()))
+    session$sendCustomMessage(model_channel, to_frontend(model()))
   }
 
   session$onFlushed(function() {
-    session$sendCustomMessage(model_channel, view(isolate(model())))
+    session$sendCustomMessage(model_channel, to_frontend(isolate(model())))
   })
 
   observe({
     push()
   })
 
+  msg_factory <- msg
+
   observeEvent(input[[msg_input]], {
-    msg <- input[[msg_input]]
-    type <- msg$type
-    value <- msg$value
+    raw <- input[[msg_input]]
+    type <- raw$type
+    value <- raw$value
+
+    if (!is.null(msg_factory)) {
+      type <- msg_factory(type)
+    }
 
     if (!is.null(on_msg)) {
       proceed <- on_msg(model, type, value, session)

@@ -1,62 +1,60 @@
 library(shiny)
 library(shinymvu)
 
-# -- Messages ---------------------------------------------------------------
-Msg <- mvu_enum(c("increment", "decrement", "reset"))
+# -- Counter Module ----------------------------------------------------------
 
-# -- Model -------------------------------------------------------------------
-init <- function() {
+counter_msg <- mvu_enum(c("increment", "decrement", "reset"))
+
+counter_init <- function() {
   list(count = 0)
 }
 
-# -- Update ------------------------------------------------------------------
-update <- function(model, msg, value = NULL) {
-  match_enum(Msg(msg),
+counter_update <- function(model, msg, value = NULL) {
+  match_enum(msg,
     "increment" ~ list_set(model, count = model$count + 1),
     "decrement" ~ list_set(model, count = model$count - 1),
     "reset"     ~ list_set(model, count = 0)
   )
 }
 
-# -- View --------------------------------------------------------------------
-view <- function(model) {
-  list(
-    count = model$count,
-    is_zero = model$count == 0
-  )
-}
-
-# -- UI ----------------------------------------------------------------------
-ui <- mvu_page(
-  div(
-    class = "container py-5 text-center",
-    tags$h1("Counter", class = "mb-4"),
+counter_ui <- function(id) {
+  mvu_module_ui(id,
     div(
-      class = "d-flex gap-3 justify-content-center align-items-center",
-      mvu_button("\U2212", msg = "decrement",
-        class = "btn btn-outline-primary btn-lg"),
-      tags$span(`x-text` = "model.count", class = "display-4 mx-3"),
-      mvu_button("+", msg = "increment",
-        class = "btn btn-primary btn-lg")
-    ),
-    div(
-      class = "mt-3",
-      tags$button(
-        class = "btn btn-outline-secondary",
-        `x-show` = "!model.is_zero",
-        `@click` = "send('reset')",
-        "Reset"
+      class = "text-center py-4",
+      div(
+        mvu_button("\U2212", msg = "decrement"),
+        tags$span(`x-text` = "model.count", class = "display-4 mx-3"),
+        mvu_button("+", msg = "increment")
+      ),
+      div(
+        class = "mt-3",
+        mvu_button(
+          "Reset", 
+          msg = "reset", 
+          `x-show` = "model.count !== 0"
+        )
       )
     )
   )
+}
+
+counter_server <- function(id) {
+  mvu_module_server(id,
+    init = counter_init,
+    update = counter_update,
+    msg = counter_msg
+  )
+}
+
+# -- App ---------------------------------------------------------------------
+
+ui <- bslib::page_fillable(
+  tags$h1("Counter", class = "text-center mt-4"),
+  counter_ui("counter1")
 )
 
-# -- Server ------------------------------------------------------------------
 server <- function(input, output, session) {
-  mvu_server(
-    init = init, update = update, view = view,
-    input = input, output = output, session = session
-  )
+  counter_server("counter1")
 }
 
 shinyApp(ui, server)

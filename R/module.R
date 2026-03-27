@@ -31,6 +31,7 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
                           extra_js = NULL, extra_channels = NULL) {
   ns <- NS(id)
   comp_id <- ns(component)
+  js_name <- gsub("-", "_", comp_id)
   tagList(
     tags$style(HTML("[x-cloak]{display:none!important}")),
     mvu_bridge_js(comp_id, extra_js = extra_js, extra_channels = extra_channels),
@@ -38,7 +39,7 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
       src = "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js",
       defer = NA
     ),
-    div(`x-data` = comp_id, `x-cloak` = NA, ...)
+    div(`x-data` = js_name, `x-cloak` = NA, ...)
   )
 }
 
@@ -52,8 +53,11 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
 #' @param init A function returning the initial model.
 #' @param update A function with signature `function(model, msg, value)` that
 #'   returns a new model.
-#' @param view A function with signature `function(model)` that returns a
-#'   JSON-serializable list for the client.
+#' @param msg An optional enum factory created by [mvu_enum()]. See
+#'   [mvu_server()] for details.
+#' @param to_frontend A function with signature `function(model)` that
+#'   projects the model into a JSON-serializable list for the client.
+#'   Defaults to [identity()].
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument in [mvu_module_ui()].
 #' @param on_msg Optional message hook. See [mvu_server()] for details.
@@ -66,18 +70,20 @@ mvu_module_ui <- function(id, ..., component = "mvu", theme = bslib::bs_theme(),
 #'   mvu_module_server("counter",
 #'     init = function() list(count = 0),
 #'     update = function(model, msg, value) model,
-#'     view = function(model) model
+#'     to_frontend = function(model) model  # or omit to send model as-is
 #'   )
 #' }
 #' }
 #'
 #' @export
-mvu_module_server <- function(id, init, update, view,
+mvu_module_server <- function(id, init, update, msg = NULL,
+                              to_frontend = identity,
                               component = "mvu", on_msg = NULL) {
   moduleServer(id, function(input, output, session) {
     comp_id <- session$ns(component)
     mvu_server(
-      init = init, update = update, view = view,
+      init = init, update = update, msg = msg,
+      to_frontend = to_frontend,
       component = component, on_msg = on_msg,
       input = input, output = output, session = session,
       .channel_component = comp_id

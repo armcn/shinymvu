@@ -7,7 +7,8 @@
 mvu_server(
   init,
   update,
-  view,
+  msg = NULL,
+  to_frontend = identity,
   component = "mvu",
   on_msg = NULL,
   input,
@@ -20,12 +21,17 @@ mvu_server(
 \item{init}{A function returning the initial model (a list).}
 
 \item{update}{A function with signature \verb{function(model, msg, value)} that
-takes the current model, a message type string, and an optional value,
-and returns a new model. Must be a pure function.}
+takes the current model, a message type (string or \code{mvu_enum}), and an
+optional value, and returns a new model. Must be a pure function.}
 
-\item{view}{A function with signature \verb{function(model)} that transforms the
-model into a JSON-serializable list sent to the client. Only include data
-needed for rendering.}
+\item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. When
+provided, incoming message type strings are automatically validated
+and converted to \code{mvu_enum} objects before being passed to \code{update}.}
+
+\item{to_frontend}{A function with signature \verb{function(model)} that
+projects the server-side model into a JSON-serializable list for the
+client. May include derived display values. Defaults to \code{\link[=identity]{identity()}},
+which sends the model as-is.}
 
 \item{component}{Character string naming the Alpine.js component. Must
 match the \code{component} argument used in \code{\link[=mvu_page]{mvu_page()}} or
@@ -51,8 +57,8 @@ The model \code{reactiveVal}, allowing further reactive integration.
 \description{
 The core reactive runtime that connects the Model-View-Update cycle.
 Listens for messages from the Alpine.js client, passes them through the
-user-defined \code{update} function, and pushes the resulting view back to the
-browser via \code{sendCustomMessage}.
+user-defined \code{update} function, and pushes the resulting frontend model
+back to the browser via \code{sendCustomMessage}.
 }
 \examples{
 \dontrun{
@@ -60,7 +66,6 @@ server <- function(input, output, session) {
   mvu_server(
     init = function() list(count = 0),
     update = function(model, msg, value) model,
-    view = function(model) model,
     input = input, output = output, session = session
   )
 }

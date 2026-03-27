@@ -60,6 +60,7 @@ mvu_page <- function(..., component = "mvu", theme = bslib::bs_theme(),
 #' @keywords internal
 mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
                           extra_channels = NULL) {
+  js_name <- gsub("-", "_", component)
   model_channel <- paste0(component, "__model")
   msg_id <- paste0(component, "__msg")
 
@@ -98,7 +99,7 @@ mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
         };
       });
     });
-  ', component, model_channel, extra_handlers, msg_id,
+  ', js_name, model_channel, extra_handlers, msg_id,
   if (!is.null(extra_js)) paste0(",\n", extra_js) else "")
   tags$script(HTML(js))
 }

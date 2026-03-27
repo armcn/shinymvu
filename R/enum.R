@@ -11,8 +11,8 @@
 #'   set of valid values.
 #'
 #' @examples
-#' Msg <- mvu_enum(c("increment", "decrement", "reset"))
-#' Msg("increment")
+#' check_msg <- mvu_enum(c("increment", "decrement", "reset"))
+#' check_msg("increment")
 #'
 #' @export
 mvu_enum <- function(values) {
@@ -45,16 +45,18 @@ mvu_enum <- function(values) {
 #' @return The result of evaluating the matched expression.
 #'
 #' @examples
-#' Msg <- mvu_enum(c("increment", "decrement", "reset"))
+#' check_msg <- mvu_enum(c("increment", "decrement", "reset"))
 #' model <- list(count = 5)
 #'
-#' match_enum(Msg("increment"),
+#' msg <- check_msg("increment")
+#' match_enum(msg,
 #'   "increment" ~ list_set(model, count = model$count + 1),
 #'   "decrement" ~ list_set(model, count = model$count - 1),
 #'   "reset"     ~ list_set(model, count = 0)
 #' )
 #'
-#' match_enum(Msg("reset"),
+#' msg <- check_msg("reset")
+#' match_enum(msg,
 #'   "reset" ~ list_set(model, count = 0),
 #'   .default = model
 #' )

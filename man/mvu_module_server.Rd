@@ -4,7 +4,15 @@
 \alias{mvu_module_server}
 \title{MVU Module Server}
 \usage{
-mvu_module_server(id, init, update, view, component = "mvu", on_msg = NULL)
+mvu_module_server(
+  id,
+  init,
+  update,
+  msg = NULL,
+  to_frontend = identity,
+  component = "mvu",
+  on_msg = NULL
+)
 }
 \arguments{
 \item{id}{The module ID string (must match the \code{id} in \code{\link[=mvu_module_ui]{mvu_module_ui()}}).}
@@ -14,8 +22,12 @@ mvu_module_server(id, init, update, view, component = "mvu", on_msg = NULL)
 \item{update}{A function with signature \verb{function(model, msg, value)} that
 returns a new model.}
 
-\item{view}{A function with signature \verb{function(model)} that returns a
-JSON-serializable list for the client.}
+\item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. See
+\code{\link[=mvu_server]{mvu_server()}} for details.}
+
+\item{to_frontend}{A function with signature \verb{function(model)} that
+projects the model into a JSON-serializable list for the client.
+Defaults to \code{\link[=identity]{identity()}}.}
 
 \item{component}{Character string naming the Alpine.js component. Must
 match the \code{component} argument in \code{\link[=mvu_module_ui]{mvu_module_ui()}}.}
@@ -36,7 +48,7 @@ server <- function(input, output, session) {
   mvu_module_server("counter",
     init = function() list(count = 0),
     update = function(model, msg, value) model,
-    view = function(model) model
+    to_frontend = function(model) model  # or omit to send model as-is
   )
 }
 }
