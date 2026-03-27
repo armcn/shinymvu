@@ -136,6 +136,78 @@ mvu_checkbox <- function(label, msg, checked_expr, ...) {
   )
 }
 
+#' Create a Controlled Text Input (Elm-style)
+#'
+#' Generates a text `<input>` that dispatches an MVU message on every
+#' keystroke, sending the current value through the full R round-trip.
+#' The displayed value is bound to the model via `x-effect`, which only
+#' writes to the DOM when the model value actually differs from what the
+#' user has typed -- preserving cursor position on echo.
+#'
+#' This is the Elm-style "controlled input" pattern. Every character
+#' goes: browser -> WebSocket -> R `update()` -> `to_frontend()` ->
+#' WebSocket -> Alpine. Typical round-trip is 30-80ms. At normal
+#' typing speed this is usually imperceptible, but very fast typists
+#' or high-latency connections may notice.
+#'
+#' @param label Label text displayed above the input.
+#' @param msg Character string specifying the message type to dispatch.
+#' @param value_expr A JavaScript expression for the model field that
+#'   holds this input's value, e.g. `"model.name"`.
+#' @param ... Additional HTML attributes passed to [shiny::tags]`$input`.
+#'
+#' @return A [htmltools::tagList()] with label and input elements.
+#'
+#' @examples
+#' mvu_text_input("First name", msg = "set_first", value_expr = "model.first_name")
+#'
+#' @export
+mvu_text_input <- function(label, msg, value_expr, ...) {
+  effect <- sprintf(
+    "if ($el.value !== String(%s || '')) $el.value = String(%s || '')",
+    value_expr, value_expr
+  )
+  tagList(
+    tags$label(class = "form-label", label),
+    tags$input(
+      type = "text", class = "form-control",
+      `x-effect` = effect,
+      `@input` = sprintf("send('%s', $event.target.value)", msg),
+      ...
+    )
+  )
+}
+
+#' Create a Controlled Textarea (Elm-style)
+#'
+#' Like [mvu_text_input()] but renders a `<textarea>` for multi-line
+#' content. Every keystroke round-trips through R.
+#'
+#' @inheritParams mvu_text_input
+#' @param rows Number of visible text rows. Defaults to 3.
+#'
+#' @return A [htmltools::tagList()] with label and textarea elements.
+#'
+#' @examples
+#' mvu_textarea("Bio", msg = "set_bio", value_expr = "model.bio", rows = 4)
+#'
+#' @export
+mvu_textarea <- function(label, msg, value_expr, rows = 3, ...) {
+  effect <- sprintf(
+    "if ($el.value !== String(%s || '')) $el.value = String(%s || '')",
+    value_expr, value_expr
+  )
+  tagList(
+    tags$label(class = "form-label", label),
+    tags$textarea(
+      class = "form-control", rows = rows,
+      `x-effect` = effect,
+      `@input` = sprintf("send('%s', $event.target.value)", msg),
+      ...
+    )
+  )
+}
+
 #' Create a Message-Dispatching Slider
 #'
 #' Generates a Bootstrap-styled range slider that dispatches an MVU message
