@@ -136,75 +136,95 @@ mvu_checkbox <- function(label, msg, checked_expr, ...) {
   )
 }
 
-#' Create a Controlled Text Input (Elm-style)
+#' Create a Local Text Input with Debounced Send
 #'
-#' Generates a text `<input>` that dispatches an MVU message on every
-#' keystroke, sending the current value through the full R round-trip.
-#' The displayed value is bound to the model via `x-effect`, which only
-#' writes to the DOM when the model value actually differs from what the
-#' user has typed -- preserving cursor position on echo.
+#' Generates a text `<input>` bound to Alpine-local state via `x-model`.
+#' The value lives in the browser and is never overwritten by the server.
+#' When `msg` is provided, the current value is sent to R after the user
+#' stops typing for `debounce` milliseconds. This is the recommended
+#' approach for text inputs in MVU apps -- it avoids the round-trip
+#' latency that makes Elm-style controlled inputs unreliable over a
+#' network.
 #'
-#' This is the Elm-style "controlled input" pattern. Every character
-#' goes: browser -> WebSocket -> R `update()` -> `to_frontend()` ->
-#' WebSocket -> Alpine. Typical round-trip is 30-80ms. At normal
-#' typing speed this is usually imperceptible, but very fast typists
-#' or high-latency connections may notice.
+#' For inputs that should only send on explicit action (e.g. a Save
+#' button), omit `msg` and read the value from `local` in a
+#' [mvu_button_expr()] click handler.
 #'
 #' @param label Label text displayed above the input.
-#' @param msg Character string specifying the message type to dispatch.
-#' @param value_expr A JavaScript expression for the model field that
-#'   holds this input's value, e.g. `"model.name"`.
+#' @param local A JavaScript property name for the Alpine-local state,
+#'   e.g. `"firstName"`. This must be declared in `extra_js` when
+#'   creating the page or module UI.
+#' @param msg Optional message type. When provided, sends the value to
+#'   R after the debounce delay. When `NULL` (default), the value stays
+#'   local until explicitly sent.
+#' @param debounce Milliseconds to wait after the last keystroke before
+#'   sending. Only used when `msg` is not `NULL`. Defaults to `300`.
 #' @param ... Additional HTML attributes passed to [shiny::tags]`$input`.
 #'
 #' @return A [htmltools::tagList()] with label and input elements.
 #'
 #' @examples
-#' mvu_text_input("First name", msg = "set_first", value_expr = "model.first_name")
+#' # Debounced send: value dispatched 300ms after typing stops
+#' mvu_text_local("Search", local = "search", msg = "search")
+#'
+#' # No auto-send: use a button to send explicitly
+#' mvu_text_local("Name", local = "name")
 #'
 #' @export
-mvu_text_input <- function(label, msg, value_expr, ...) {
-  effect <- sprintf(
-    "if ($el.value !== String(%s || '')) $el.value = String(%s || '')",
-    value_expr, value_expr
-  )
-  tagList(
-    tags$label(class = "form-label", label),
-    tags$input(
+mvu_text_local <- function(label, local, msg = NULL, debounce = 300, ...) {
+  if (!is.null(msg)) {
+    input_attr <- sprintf(
+      "@input.debounce.%dms=\"send('%s', %s)\"",
+      as.integer(debounce), msg, local
+    )
+    input_tag <- tags$input(
       type = "text", class = "form-control",
-      `x-effect` = effect,
-      `@input` = sprintf("send('%s', $event.target.value)", msg),
+      `x-model` = local,
       ...
     )
+    input_tag$attribs[[sprintf("@input.debounce.%dms", as.integer(debounce))]] <-
+      sprintf("send('%s', %s)", msg, local)
+  } else {
+    input_tag <- tags$input(
+      type = "text", class = "form-control",
+      `x-model` = local,
+      ...
+    )
+  }
+  tagList(
+    tags$label(class = "form-label", label),
+    input_tag
   )
 }
 
-#' Create a Controlled Textarea (Elm-style)
+#' Create a Local Textarea with Debounced Send
 #'
-#' Like [mvu_text_input()] but renders a `<textarea>` for multi-line
-#' content. Every keystroke round-trips through R.
+#' Like [mvu_text_local()] but renders a `<textarea>`. The value lives
+#' in Alpine-local state and is optionally sent to R after debounce.
 #'
-#' @inheritParams mvu_text_input
+#' @inheritParams mvu_text_local
 #' @param rows Number of visible text rows. Defaults to 3.
 #'
 #' @return A [htmltools::tagList()] with label and textarea elements.
 #'
 #' @examples
-#' mvu_textarea("Bio", msg = "set_bio", value_expr = "model.bio", rows = 4)
+#' mvu_textarea_local("Notes", local = "notes", msg = "set_notes", debounce = 500)
 #'
 #' @export
-mvu_textarea <- function(label, msg, value_expr, rows = 3, ...) {
-  effect <- sprintf(
-    "if ($el.value !== String(%s || '')) $el.value = String(%s || '')",
-    value_expr, value_expr
+mvu_textarea_local <- function(label, local, msg = NULL, debounce = 300,
+                               rows = 3, ...) {
+  textarea_tag <- tags$textarea(
+    class = "form-control", rows = rows,
+    `x-model` = local,
+    ...
   )
+  if (!is.null(msg)) {
+    textarea_tag$attribs[[sprintf("@input.debounce.%dms", as.integer(debounce))]] <-
+      sprintf("send('%s', %s)", msg, local)
+  }
   tagList(
     tags$label(class = "form-label", label),
-    tags$textarea(
-      class = "form-control", rows = rows,
-      `x-effect` = effect,
-      `@input` = sprintf("send('%s', $event.target.value)", msg),
-      ...
-    )
+    textarea_tag
   )
 }
 
