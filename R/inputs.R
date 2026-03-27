@@ -136,38 +136,38 @@ mvu_checkbox <- function(label, msg, checked_expr, ...) {
   )
 }
 
-#' Create a Local Text Input with Debounced Send
+#' Create a Text Input with Debounced Send
 #'
 #' Generates a text `<input>` bound to Alpine-local state via `x-model`.
-#' The value lives in the browser and is never overwritten by the server.
-#' When `msg` is provided, the current value is sent to R after the user
-#' stops typing for `debounce` milliseconds. This is the recommended
-#' approach for text inputs in MVU apps -- it avoids the round-trip
-#' latency that makes Elm-style controlled inputs unreliable over a
-#' network.
+#' Typing is instant (no round-trip). After the user stops typing for
+#' `debounce` milliseconds, the current value is sent to R as a message,
+#' updating the model. This is the recommended approach for text inputs
+#' -- it gives the user immediate feedback while keeping the model in
+#' sync, just like Elm but with a small debounce to accommodate the
+#' network boundary.
 #'
-#' For inputs that should only send on explicit action (e.g. a Save
-#' button), omit `msg` and read the value from `local` in a
-#' [mvu_button_expr()] click handler.
+#' For multi-field forms that need atomic commits (e.g. saving name +
+#' bio together), omit `msg` and read the value from `local` in a
+#' [mvu_button_expr()] click handler instead.
 #'
 #' @param label Label text displayed above the input.
 #' @param local A JavaScript property name for the Alpine-local state,
 #'   e.g. `"firstName"`. This must be declared in `extra_js` when
 #'   creating the page or module UI.
-#' @param msg Optional message type. When provided, sends the value to
-#'   R after the debounce delay. When `NULL` (default), the value stays
-#'   local until explicitly sent.
+#' @param msg The message type to dispatch. The value is sent to R
+#'   after the debounce delay. Pass `NULL` to keep the value local
+#'   until explicitly sent via a button.
 #' @param debounce Milliseconds to wait after the last keystroke before
-#'   sending. Only used when `msg` is not `NULL`. Defaults to `300`.
+#'   sending. Defaults to `300`.
 #' @param ... Additional HTML attributes passed to [shiny::tags]`$input`.
 #'
 #' @return A [htmltools::tagList()] with label and input elements.
 #'
 #' @examples
-#' # Debounced send: value dispatched 300ms after typing stops
-#' mvu_text_local("Search", local = "search", msg = "search")
+#' # Standard usage: model updates 300ms after typing stops
+#' mvu_text_local("Name", local = "name", msg = "set_name")
 #'
-#' # No auto-send: use a button to send explicitly
+#' # Explicit send only: for multi-field atomic commits
 #' mvu_text_local("Name", local = "name")
 #'
 #' @export
@@ -197,10 +197,10 @@ mvu_text_local <- function(label, local, msg = NULL, debounce = 300, ...) {
   )
 }
 
-#' Create a Local Textarea with Debounced Send
+#' Create a Textarea with Debounced Send
 #'
-#' Like [mvu_text_local()] but renders a `<textarea>`. The value lives
-#' in Alpine-local state and is optionally sent to R after debounce.
+#' Like [mvu_text_local()] but renders a `<textarea>` for multi-line
+#' content.
 #'
 #' @inheritParams mvu_text_local
 #' @param rows Number of visible text rows. Defaults to 3.

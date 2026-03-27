@@ -1,16 +1,18 @@
 library(shiny)
 library(shinymvu)
 
-# Demonstrates the two types of inputs in shinymvu:
+# Demonstrates input patterns in shinymvu:
 #
-# 1. MESSAGE INPUTS (buttons, selects, checkboxes, sliders):
-#    Every interaction dispatches a message immediately.
-#    Value comes from the model. Good for discrete actions.
+# TEXT INPUTS use debounced send by default. Typing is instant (local),
+# and the model updates after a brief pause -- just like Elm, but with
+# a debounce to accommodate the network. The developer decides what
+# happens with each intermediate value in update().
 #
-# 2. LOCAL INPUTS (text fields, textareas):
-#    Value lives in Alpine-local state, never overwritten by the server.
-#    Sent to R either on debounce or on explicit action (button click).
-#    Good for typing, where round-trip latency would be noticeable.
+# MESSAGE INPUTS (buttons, selects, checkboxes, sliders) dispatch
+# immediately on every interaction. Value comes from the model.
+#
+# EXPLICIT SAVE is the special case for multi-field forms that need
+# atomic commits (send name + bio together in one message).
 
 Msg <- mvu_enum(c(
   "set_search", "set_name", "set_bio",
@@ -61,6 +63,7 @@ to_frontend <- function(model) {
   } else {
     items
   }
+  full_name <- trimws(paste(model$name))
   list(
     search = model$search,
     name = model$name,
@@ -71,7 +74,8 @@ to_frontend <- function(model) {
     saved_count = model$saved_count,
     filtered_items = as.list(filtered),
     item_count = length(filtered),
-    bio_length = nchar(model$bio)
+    bio_length = nchar(model$bio),
+    greeting = if (nzchar(full_name)) paste0("Hello, ", full_name, "!") else ""
   )
 }
 
@@ -80,9 +84,11 @@ to_frontend <- function(model) {
 ui <- mvu_page(
   component = "app",
   extra_js = "
-    profileName: '',
-    profileBio: '',
-    searchText: ''
+    searchText: '',
+    userName: '',
+    userBio: '',
+    saveName: '',
+    saveBio: ''
   ",
 
   div(class = "container py-4", style = "max-width: 900px;",
@@ -91,20 +97,20 @@ ui <- mvu_page(
     bslib::layout_columns(
       col_widths = c(6, 6),
 
-      # --- Left column: Local inputs (text) ---
+      # --- Left column ---
       div(
+        # Debounced text: the recommended default
         tags$h6(class = "text-body-secondary fw-semibold text-uppercase mb-3",
           style = "font-size: .75rem; letter-spacing: .05em;",
-          "Local inputs (Alpine-owned state)"),
+          "Text inputs (debounced send)"),
 
-        # Search with debounced auto-send
         bslib::card(class = "mb-3",
           bslib::card_header(class = "fw-semibold", style = "font-size: .875rem;",
-            "Live Search (debounced)"),
+            "Live Search"),
           bslib::card_body(
             tags$p(class = "text-body-secondary", style = "font-size: .8125rem;",
-              "Typing sends to R after 300ms of inactivity. ",
-              "R filters the list server-side and pushes results back."),
+              "Model updates 300ms after you stop typing. ",
+              "R filters the list and pushes results back."),
             mvu_text_local("Search fruits", local = "searchText",
               msg = "set_search", debounce = 300,
               placeholder = "Try typing 'grape'..."),
@@ -122,48 +128,66 @@ ui <- mvu_page(
           )
         ),
 
-        # Profile form with explicit save
-        bslib::card(
+        bslib::card(class = "mb-3",
           bslib::card_header(class = "fw-semibold", style = "font-size: .875rem;",
-            "Profile Form (send on save)"),
+            "Name & Bio (debounced)"),
           bslib::card_body(
             tags$p(class = "text-body-secondary", style = "font-size: .8125rem;",
-              "Text stays local. Nothing is sent to R until you click Save."),
+              "Each field updates the model independently as you type. ",
+              "The greeting and character count update live."),
             div(class = "mb-2",
-              mvu_text_local("Display name", local = "profileName",
-                placeholder = "Enter your name...")
+              mvu_text_local("Name", local = "userName",
+                msg = "set_name", debounce = 300,
+                placeholder = "Type your name...")
             ),
             div(class = "mb-3",
-              mvu_textarea_local("About you", local = "profileBio",
-                rows = 2, placeholder = "Write a short bio...")
+              mvu_textarea_local("Bio", local = "userBio",
+                msg = "set_bio", debounce = 300,
+                rows = 2, placeholder = "Write about yourself...")
+            ),
+            div(class = "border rounded-2 p-2",
+              style = "background: var(--bs-tertiary-bg); font-size: .8125rem;",
+              div(`x-show` = "model.greeting",
+                tags$span(class = "fw-semibold", `x-text` = "model.greeting")),
+              div(class = "text-body-secondary",
+                `x-text` = "'Bio: ' + model.bio_length + ' chars'")
+            )
+          )
+        ),
+
+        # Explicit save: the special case
+        bslib::card(
+          bslib::card_header(class = "fw-semibold", style = "font-size: .875rem;",
+            "Multi-field Save (explicit send)"),
+          bslib::card_body(
+            tags$p(class = "text-body-secondary", style = "font-size: .8125rem;",
+              "For atomic commits: both fields are sent together when ",
+              "you click Save. Nothing goes to R until then."),
+            div(class = "mb-2",
+              mvu_text_local("Name", local = "saveName",
+                placeholder = "Enter name...")
+            ),
+            div(class = "mb-3",
+              mvu_textarea_local("Bio", local = "saveBio",
+                rows = 2, placeholder = "Enter bio...")
             ),
             div(class = "d-flex gap-2 align-items-center",
               mvu_button_expr("Save Profile", msg = "save_profile",
-                value_expr = "{ name: profileName, bio: profileBio }",
+                value_expr = "{ name: saveName, bio: saveBio }",
                 class = "btn btn-primary btn-sm"),
               tags$small(class = "text-body-secondary",
                 `x-show` = "model.saved_count > 0",
                 `x-text` = "'Saved ' + model.saved_count + ' time(s)'")
-            ),
-
-            div(class = "mt-3 border rounded-2 p-2",
-              `x-show` = "model.name",
-              style = "background: var(--bs-tertiary-bg); font-size: .8125rem;",
-              tags$span(class = "text-body-secondary", "Server model: "),
-              tags$span(class = "fw-semibold", `x-text` = "model.name"),
-              tags$span(class = "text-body-secondary ms-2",
-                `x-show` = "model.bio_length > 0",
-                `x-text` = "'(' + model.bio_length + ' char bio)'")
             )
           )
         )
       ),
 
-      # --- Right column: Message inputs (model-owned state) ---
+      # --- Right column: Message inputs ---
       div(
         tags$h6(class = "text-body-secondary fw-semibold text-uppercase mb-3",
           style = "font-size: .75rem; letter-spacing: .05em;",
-          "Message inputs (model-owned state)"),
+          "Discrete inputs (immediate send)"),
 
         bslib::card(class = "mb-3",
           bslib::card_header(class = "fw-semibold", style = "font-size: .875rem;",
@@ -191,7 +215,6 @@ ui <- mvu_page(
           )
         ),
 
-        # Preview card
         bslib::card(class = "mb-3",
           bslib::card_header(class = "fw-semibold", style = "font-size: .875rem;",
             "Preview"),
