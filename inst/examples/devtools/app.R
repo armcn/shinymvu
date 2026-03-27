@@ -202,8 +202,17 @@ server <- function(input, output, session) {
 
   # --- Drive time-travel from slider ---
   observeEvent(input$time_slider, {
+    slider_val <- input$time_slider
+
     if (isTRUE(runtime$is_traveling())) {
-      runtime$travel_to(input$time_slider)
+      runtime$travel_to(slider_val)
+      return()
+    }
+
+    log <- runtime$log()
+    n <- length(log$transitions)
+    if (slider_val != n) {
+      runtime$travel_to(slider_val)
     }
   })
 
