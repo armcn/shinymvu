@@ -7,7 +7,7 @@
 mvu_password_input(
   label,
   msg,
-  bind = NULL,
+  value = NULL,
   placeholder = NULL,
   debounce = NULL,
   class = "form-control",
@@ -19,8 +19,8 @@ mvu_password_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Optional.}
+\item{value}{An Alpine.js expression for the displayed value (e.g.
+\code{"model.name"}). Keeps the input in sync with the model.}
 
 \item{placeholder}{Placeholder text.}
 

@@ -4,14 +4,15 @@
 \alias{mvu_checkbox_input}
 \title{Checkbox Input}
 \usage{
-mvu_checkbox_input(label, msg, bind = NULL, class = "form-check", ...)
+mvu_checkbox_input(label, msg, value = NULL, class = "form-check", ...)
 }
 \arguments{
 \item{label}{Label text.}
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the checked state.}
+\item{value}{An Alpine.js expression for the checked state (e.g.
+\code{"model.agree"}). Keeps the checkbox in sync with the model.}
 
 \item{class}{CSS classes for the wrapper div.}
 
@@ -24,6 +25,6 @@ A \verb{<div>} containing the checkbox and label.
 A Bootstrap checkbox that dispatches its checked state as an MVU message.
 }
 \examples{
-mvu_checkbox_input("I agree", msg = "toggle_agree", bind = "model.agree")
+mvu_checkbox_input("I agree", msg = "toggle_agree", value = "model.agree")
 
 }

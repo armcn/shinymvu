@@ -128,12 +128,12 @@ generate Bootstrap-styled HTML wired to dispatch MVU messages via
 Alpine.js -- no `inputId`, no `input$x`, just messages:
 
 ```r
-mvu_text_input("Name", msg = "set_name", bind = "model.name")
+mvu_text_input("Name", msg = "set_name", value = "model.name")
 mvu_select_input("Color", choices = c("Red" = "red", "Blue" = "blue"),
-  msg = "set_color", bind = "model.color")
-mvu_checkbox_input("I agree", msg = "toggle_agree", bind = "model.agree")
+  msg = "set_color", selected = "model.color")
+mvu_checkbox_input("I agree", msg = "toggle_agree", value = "model.agree")
 mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume",
-  bind = "model.volume")
+  value = "model.volume")
 ```
 
 See the full gallery with `shinymvu::run_gallery()` or browse

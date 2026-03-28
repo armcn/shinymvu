@@ -4,7 +4,7 @@
 \alias{mvu_radio_input}
 \title{Radio Button Input}
 \usage{
-mvu_radio_input(label, choices, msg, bind = NULL, inline = FALSE, ...)
+mvu_radio_input(label, choices, msg, selected = NULL, inline = FALSE, ...)
 }
 \arguments{
 \item{label}{Group label text.}
@@ -14,7 +14,8 @@ display labels.}
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the selected value.}
+\item{selected}{An Alpine.js expression for the currently selected value
+(e.g. \code{"model.pet"}). Keeps the radio buttons in sync with the model.}
 
 \item{inline}{If \code{TRUE}, render radio buttons horizontally.}
 
@@ -30,6 +31,6 @@ message.
 \examples{
 mvu_radio_input("Pet",
   choices = c("Dog" = "dog", "Cat" = "cat", "Fish" = "fish"),
-  msg = "set_pet", bind = "model.pet")
+  msg = "set_pet", selected = "model.pet")
 
 }

@@ -8,8 +8,8 @@ mvu_date_range_input(
   label,
   msg_start,
   msg_end,
-  bind_start = NULL,
-  bind_end = NULL,
+  start = NULL,
+  end = NULL,
   min = NULL,
   max = NULL,
   label_start = "Start",
@@ -23,7 +23,8 @@ mvu_date_range_input(
 
 \item{msg_start, msg_end}{Message types for the start and end dates.}
 
-\item{bind_start, bind_end}{Alpine.js expressions for the date values.}
+\item{start, end}{Alpine.js expressions for the start and end date
+values. Keeps the inputs in sync with the model.}
 
 \item{min, max}{Date constraints (character strings in \code{"YYYY-MM-DD"}
 format).}
@@ -44,6 +45,6 @@ dispatches a separate MVU message.
 \examples{
 mvu_date_range_input("Trip dates",
   msg_start = "set_depart", msg_end = "set_return",
-  bind_start = "model.depart", bind_end = "model.return")
+  start = "model.depart", end = "model.return")
 
 }

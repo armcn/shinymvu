@@ -9,7 +9,7 @@ mvu_slider_input(
   min,
   max,
   msg,
-  bind = NULL,
+  value = NULL,
   step = 1,
   class = "form-range",
   ...
@@ -22,7 +22,8 @@ mvu_slider_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the current value.}
+\item{value}{An Alpine.js expression for the current value (e.g.
+\code{"model.volume"}). Keeps the slider in sync with the model.}
 
 \item{step}{Numeric step increment.}
 
@@ -38,6 +39,6 @@ A range \verb{<input>} that dispatches its numeric value as an MVU message.
 }
 \examples{
 mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume",
-  bind = "model.volume")
+  value = "model.volume")
 
 }

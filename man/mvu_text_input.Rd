@@ -7,7 +7,7 @@
 mvu_text_input(
   label,
   msg,
-  bind = NULL,
+  value = NULL,
   placeholder = NULL,
   debounce = NULL,
   class = "form-control",
@@ -19,8 +19,8 @@ mvu_text_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Optional.}
+\item{value}{An Alpine.js expression for the displayed value (e.g.
+\code{"model.name"}). Keeps the input in sync with the model.}
 
 \item{placeholder}{Placeholder text.}
 
@@ -38,6 +38,6 @@ A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
 A text \verb{<input>} that dispatches its value as an MVU message on change.
 }
 \examples{
-mvu_text_input("Name", msg = "set_name", bind = "model.name")
+mvu_text_input("Name", msg = "set_name", value = "model.name")
 
 }

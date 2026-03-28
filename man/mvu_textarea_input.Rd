@@ -7,7 +7,7 @@
 mvu_textarea_input(
   label,
   msg,
-  bind = NULL,
+  value = NULL,
   rows = 3,
   placeholder = NULL,
   debounce = NULL,
@@ -20,8 +20,8 @@ mvu_textarea_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Optional.}
+\item{value}{An Alpine.js expression for the displayed value (e.g.
+\code{"model.name"}). Keeps the input in sync with the model.}
 
 \item{rows}{Number of visible text rows.}
 
@@ -41,6 +41,6 @@ A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and textarea.
 A \verb{<textarea>} that dispatches its value as an MVU message.
 }
 \examples{
-mvu_textarea_input("Bio", msg = "set_bio", bind = "model.bio", rows = 4)
+mvu_textarea_input("Bio", msg = "set_bio", value = "model.bio", rows = 4)
 
 }

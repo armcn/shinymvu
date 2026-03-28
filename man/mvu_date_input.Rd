@@ -7,7 +7,7 @@
 mvu_date_input(
   label,
   msg,
-  bind = NULL,
+  value = NULL,
   min = NULL,
   max = NULL,
   class = "form-control",
@@ -19,7 +19,8 @@ mvu_date_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the current date value.}
+\item{value}{An Alpine.js expression for the current date value (e.g.
+\code{"model.birthday"}). Keeps the input in sync with the model.}
 
 \item{min, max}{Date range constraints (character strings in
 \code{"YYYY-MM-DD"} format).}
@@ -36,6 +37,6 @@ A date \verb{<input>} that dispatches the selected date string as an MVU
 message.
 }
 \examples{
-mvu_date_input("Birthday", msg = "set_birthday", bind = "model.birthday")
+mvu_date_input("Birthday", msg = "set_birthday", value = "model.birthday")
 
 }

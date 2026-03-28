@@ -97,8 +97,8 @@ test_that("mvu_text_input generates text input with label", {
   expect_match(html, "set_name")
 })
 
-test_that("mvu_text_input with bind adds x-bind:value", {
-  ti <- mvu_text_input("Name", msg = "set_name", bind = "model.name")
+test_that("mvu_text_input with value adds x-bind:value", {
+  ti <- mvu_text_input("Name", msg = "set_name", value = "model.name")
   html <- as.character(ti)
   expect_match(html, "x-bind:value")
   expect_match(html, "model.name")
@@ -145,7 +145,7 @@ test_that("mvu_textarea_input generates textarea", {
 test_that("mvu_select_input generates select with options", {
   sel <- mvu_select_input("Color",
     choices = c("Red" = "red", "Blue" = "blue"),
-    msg = "set_color", bind = "model.color")
+    msg = "set_color", selected = "model.color")
   html <- as.character(sel)
   expect_match(html, "<select")
   expect_match(html, 'value="red"')
@@ -165,7 +165,7 @@ test_that("mvu_select_input unnamed choices use value as label", {
 # -- mvu_checkbox_input --------------------------------------------------------
 
 test_that("mvu_checkbox_input generates checkbox", {
-  cb <- mvu_checkbox_input("Agree", msg = "toggle", bind = "model.agree")
+  cb <- mvu_checkbox_input("Agree", msg = "toggle", value = "model.agree")
   html <- as.character(cb)
   expect_match(html, 'type="checkbox"')
   expect_match(html, "toggle")
@@ -178,7 +178,7 @@ test_that("mvu_checkbox_input generates checkbox", {
 test_that("mvu_checkbox_group_input generates multiple checkboxes", {
   cg <- mvu_checkbox_group_input("Toppings",
     choices = c("Cheese", "Peppers"),
-    msg = "toggle_top", bind = "model.toppings")
+    msg = "toggle_top", selected = "model.toppings")
   html <- as.character(cg)
   expect_match(html, "Cheese")
   expect_match(html, "Peppers")
@@ -191,7 +191,7 @@ test_that("mvu_checkbox_group_input generates multiple checkboxes", {
 test_that("mvu_radio_input generates radio buttons", {
   ri <- mvu_radio_input("Pet",
     choices = c("Dog" = "dog", "Cat" = "cat"),
-    msg = "set_pet", bind = "model.pet")
+    msg = "set_pet", selected = "model.pet")
   html <- as.character(ri)
   expect_match(html, 'type="radio"')
   expect_match(html, "Dog")
@@ -212,7 +212,7 @@ test_that("mvu_radio_input shares group name", {
 
 test_that("mvu_slider_input generates range input", {
   sl <- mvu_slider_input("Vol", min = 0, max = 100, msg = "set_vol",
-    bind = "model.vol")
+    value = "model.vol")
   html <- as.character(sl)
   expect_match(html, 'type="range"')
   expect_match(html, 'min="0"')
@@ -230,7 +230,7 @@ test_that("mvu_slider_input custom step", {
 # -- mvu_date_input ------------------------------------------------------------
 
 test_that("mvu_date_input generates date input", {
-  di <- mvu_date_input("Birthday", msg = "set_bday", bind = "model.bday")
+  di <- mvu_date_input("Birthday", msg = "set_bday", value = "model.bday")
   html <- as.character(di)
   expect_match(html, 'type="date"')
   expect_match(html, "set_bday")
@@ -249,7 +249,7 @@ test_that("mvu_date_input with min/max constraints", {
 test_that("mvu_date_range_input generates two date inputs", {
   dr <- mvu_date_range_input("Trip",
     msg_start = "set_depart", msg_end = "set_return",
-    bind_start = "model.depart", bind_end = "model.return")
+    start = "model.depart", end = "model.return")
   html <- as.character(dr)
   expect_match(html, "set_depart")
   expect_match(html, "set_return")

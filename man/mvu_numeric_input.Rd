@@ -7,7 +7,7 @@
 mvu_numeric_input(
   label,
   msg,
-  bind = NULL,
+  value = NULL,
   min = NULL,
   max = NULL,
   step = NULL,
@@ -21,8 +21,8 @@ mvu_numeric_input(
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Optional.}
+\item{value}{An Alpine.js expression for the displayed value (e.g.
+\code{"model.name"}). Keeps the input in sync with the model.}
 
 \item{min, max, step}{Numeric constraints for the input.}
 
@@ -40,7 +40,7 @@ A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
 A number \verb{<input>} that dispatches its numeric value as an MVU message.
 }
 \examples{
-mvu_numeric_input("Age", msg = "set_age", bind = "model.age",
+mvu_numeric_input("Age", msg = "set_age", value = "model.age",
   min = 0, max = 120)
 
 }

@@ -4,7 +4,14 @@
 \alias{mvu_select_input}
 \title{Select Input}
 \usage{
-mvu_select_input(label, choices, msg, bind = NULL, class = "form-select", ...)
+mvu_select_input(
+  label,
+  choices,
+  msg,
+  selected = NULL,
+  class = "form-select",
+  ...
+)
 }
 \arguments{
 \item{label}{Label text.}
@@ -14,7 +21,8 @@ used as display labels.}
 
 \item{msg}{Message type to dispatch.}
 
-\item{bind}{Alpine.js expression for the selected value.}
+\item{selected}{An Alpine.js expression for the currently selected value
+(e.g. \code{"model.color"}). Keeps the dropdown in sync with the model.}
 
 \item{class}{CSS classes for the select.}
 
@@ -29,6 +37,6 @@ A \verb{<select>} dropdown that dispatches the selected value as an MVU message.
 \examples{
 mvu_select_input("Color",
   choices = c("Red" = "red", "Green" = "green", "Blue" = "blue"),
-  msg = "set_color", bind = "model.color")
+  msg = "set_color", selected = "model.color")
 
 }

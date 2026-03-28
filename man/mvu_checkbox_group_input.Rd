@@ -4,7 +4,14 @@
 \alias{mvu_checkbox_group_input}
 \title{Checkbox Group Input}
 \usage{
-mvu_checkbox_group_input(label, choices, msg, bind = NULL, inline = FALSE, ...)
+mvu_checkbox_group_input(
+  label,
+  choices,
+  msg,
+  selected = NULL,
+  inline = FALSE,
+  ...
+)
 }
 \arguments{
 \item{label}{Group label text.}
@@ -14,8 +21,9 @@ display labels.}
 
 \item{msg}{Message type dispatched for each toggle.}
 
-\item{bind}{Alpine.js expression for the array of selected values (e.g.
-\code{"model.toppings"}).}
+\item{selected}{An Alpine.js expression for the array of currently
+selected values (e.g. \code{"model.toppings"}). Keeps the checkboxes in
+sync with the model.}
 
 \item{inline}{If \code{TRUE}, render checkboxes horizontally.}
 
@@ -32,6 +40,6 @@ in/out of a list.
 \examples{
 mvu_checkbox_group_input("Toppings",
   choices = c("Cheese", "Peppers", "Onions"),
-  msg = "toggle_topping", bind = "model.toppings")
+  msg = "toggle_topping", selected = "model.toppings")
 
 }
