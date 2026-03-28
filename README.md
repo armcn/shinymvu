@@ -121,17 +121,57 @@ Alpine reactively updates the DOM. One direction, every time.
 pak::pak("shinymvu/shinymvu")
 ```
 
+## Inputs
+
+The package provides wrappers for every standard Shiny input. They
+generate Bootstrap-styled HTML wired to dispatch MVU messages via
+Alpine.js -- no `inputId`, no `input$x`, just messages:
+
+```r
+mvu_text_input("Name", msg = "set_name", bind = "model.name")
+mvu_select_input("Color", choices = c("Red" = "red", "Blue" = "blue"),
+  msg = "set_color", bind = "model.color")
+mvu_checkbox_input("I agree", msg = "toggle_agree", bind = "model.agree")
+mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume",
+  bind = "model.volume")
+```
+
+See the full gallery with `shinymvu::run_gallery()` or browse
+`inst/examples/gallery/app.R`.
+
+For custom markup, use the low-level event handlers with any
+`tags$` element:
+
+```r
+tags$button(!!!on_click("increment"), "Custom button")
+tags$select(!!!on_input("set_color"), tags$option(value = "red", "Red"))
+tags$input(type = "checkbox", !!!on_check("toggle"))
+tags$input(type = "range", !!!on_input_num("set_volume"))
+```
+
 ## API reference
 
-| Function | Purpose |
+| | |
 |---|---|
+| **Core** | |
 | `mvu_module_ui()` / `mvu_module_server()` | Shiny module wrappers |
 | `mvu_page()` / `mvu_server()` | Standalone (non-module) app |
-| `mvu_enum()` | Define valid message types |
-| `match_enum()` | Exhaustive pattern matching on messages |
+| `mvu_enum()` / `match_enum()` | Message types + exhaustive matching |
 | `list_set()` | Immutable list updates |
-| `mvu_button()`, `mvu_select()`, `mvu_checkbox()`, `mvu_slider()` | Input helpers |
 | `mvu_dispatch()` | Test helper for pure update functions |
+| **Inputs** | |
+| `mvu_button()` | Action button |
+| `mvu_text_input()` / `mvu_password_input()` / `mvu_textarea_input()` | Text inputs |
+| `mvu_numeric_input()` / `mvu_slider_input()` | Numeric inputs |
+| `mvu_select_input()` | Dropdown select |
+| `mvu_checkbox_input()` / `mvu_checkbox_group_input()` | Checkboxes |
+| `mvu_radio_input()` | Radio buttons |
+| `mvu_date_input()` / `mvu_date_range_input()` | Date pickers |
+| `mvu_file_input()` | File upload |
+| **Event handlers** | |
+| `on_click()` / `on_click_expr()` | Click events (for custom markup via `!!!`) |
+| `on_input()` / `on_input_num()` | Value change events |
+| `on_check()` | Checkbox toggle events |
 
 ## License
 

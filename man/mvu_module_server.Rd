@@ -11,7 +11,8 @@ mvu_module_server(
   msg = NULL,
   to_frontend = identity,
   component = "mvu",
-  on_msg = NULL
+  on_msg = NULL,
+  devtools = FALSE
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ mvu_module_server(
 \item{init}{A function returning the initial model.}
 
 \item{update}{A function with signature \verb{function(model, msg, value)} that
-returns a new model.}
+returns a new model or an \code{\link[=mvu_result]{mvu_result()}}.}
 
 \item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. See
 \code{\link[=mvu_server]{mvu_server()}} for details.}
@@ -32,10 +33,15 @@ Defaults to \code{\link[=identity]{identity()}}.}
 \item{component}{Character string naming the Alpine.js component. Must
 match the \code{component} argument in \code{\link[=mvu_module_ui]{mvu_module_ui()}}.}
 
-\item{on_msg}{Optional message hook. See \code{\link[=mvu_server]{mvu_server()}} for details.}
+\item{on_msg}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Optional message hook.
+See \code{\link[=mvu_server]{mvu_server()}} for details.}
+
+\item{devtools}{Logical. When \code{TRUE}, records transitions. See
+\code{\link[=mvu_server]{mvu_server()}} for details on the changed return type.}
 }
 \value{
-The model \code{reactiveVal}, returned from the module.
+See \code{\link[=mvu_server]{mvu_server()}} — the model \code{reactiveVal} (default) or a list
+with \verb{$model} and \verb{$log} when \code{devtools = TRUE}.
 }
 \description{
 Server-side counterpart to \code{\link[=mvu_module_ui]{mvu_module_ui()}}. Wraps \code{\link[=mvu_server]{mvu_server()}} inside
@@ -47,8 +53,7 @@ channels.
 server <- function(input, output, session) {
   mvu_module_server("counter",
     init = function() list(count = 0),
-    update = function(model, msg, value) model,
-    to_frontend = function(model) model  # or omit to send model as-is
+    update = function(model, msg, value) model
   )
 }
 }

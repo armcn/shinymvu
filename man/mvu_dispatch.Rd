@@ -4,23 +4,29 @@
 \alias{mvu_dispatch}
 \title{Dispatch Messages Through an Update Function}
 \usage{
-mvu_dispatch(init, update, messages)
+mvu_dispatch(init, update, messages, .collect_effects = FALSE)
 }
 \arguments{
 \item{init}{Either a function returning the initial model, or a model list
 directly.}
 
 \item{update}{A function with signature \verb{function(model, msg, value)} that
-returns a new model.}
+returns a new model or an \code{\link[=mvu_result]{mvu_result()}}.}
 
 \item{messages}{A list of messages to apply in order. Each element can be:
 \itemize{
 \item A character string (used as the message type, value is \code{NULL})
 \item A list with \verb{$type} and optional \verb{$value} fields
 }}
+
+\item{.collect_effects}{Logical. When \code{TRUE}, returns a list with
+\verb{$model} and \verb{$effects} instead of the model alone. Defaults to
+\code{FALSE} for backward compatibility.}
 }
 \value{
-The final model after all messages have been applied.
+When \code{.collect_effects = FALSE} (default): the final model.
+When \code{.collect_effects = TRUE}: a list with \verb{$model} (final model)
+and \verb{$effects} (all effects collected across all messages).
 }
 \description{
 A test helper that simulates the MVU runtime loop by sequentially applying
@@ -28,28 +34,33 @@ messages to a model via the \code{update} function, without needing a running
 Shiny session. Since \code{update} is pure, this enables fast, deterministic
 unit testing of application logic.
 }
+\details{
+When \code{.collect_effects} is \code{TRUE}, the return value changes to a list
+with \verb{$model} and \verb{$effects} fields, allowing tests to inspect which
+effects would have been executed.
+}
 \examples{
 update_fn <- function(model, msg, value) {
   switch(msg,
     increment = list_set(model, count = model$count + 1),
-    decrement = list_set(model, count = model$count - 1),
+    save = mvu_result(model, effect_notify("Saved!")),
     model
   )
 }
 
+# Just the model (backward compatible)
 mvu_dispatch(
   init = function() list(count = 0),
   update = update_fn,
-  messages = list("increment", "increment", "decrement")
+  messages = list("increment", "save")
 )
 
+# Model + effects
 mvu_dispatch(
-  init = list(count = 10),
+  init = function() list(count = 0),
   update = update_fn,
-  messages = list(
-    list(type = "increment", value = NULL),
-    "decrement"
-  )
+  messages = list("increment", "save"),
+  .collect_effects = TRUE
 )
 
 }

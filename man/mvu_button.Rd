@@ -2,32 +2,29 @@
 % Please edit documentation in R/inputs.R
 \name{mvu_button}
 \alias{mvu_button}
-\title{Create a Message-Dispatching Button}
+\title{Action Button}
 \usage{
 mvu_button(label, msg, value = NULL, class = "btn btn-primary", ...)
 }
 \arguments{
-\item{label}{The button label text.}
+\item{label}{The button label.}
 
-\item{msg}{Character string specifying the message type to dispatch.}
+\item{msg}{Message type to dispatch.}
 
-\item{value}{An optional static value sent with the message. Character
-values are quoted; other types are serialized to JSON.}
+\item{value}{Optional static value sent with the message.}
 
-\item{class}{CSS class string for the button element.}
+\item{class}{CSS classes. Defaults to Bootstrap primary button.}
 
-\item{...}{Additional HTML attributes passed to \link[shiny:reexports]{shiny::tags}\verb{$button}.}
+\item{...}{Additional HTML attributes.}
 }
 \value{
-A \verb{<button>} \link[shiny:reexports]{shiny::tags} element.
+A \verb{<button>} tag.
 }
 \description{
-Generates a \verb{<button>} element wired to dispatch an MVU message via
-Alpine.js \code{send()} on click.
+A \verb{<button>} that dispatches an MVU message on click.
 }
 \examples{
 mvu_button("Click me", msg = "clicked")
 mvu_button("+1", msg = "add", value = 1)
-mvu_button("Save", msg = "save", value = "draft")
 
 }

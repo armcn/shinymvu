@@ -11,6 +11,7 @@ mvu_server(
   to_frontend = identity,
   component = "mvu",
   on_msg = NULL,
+  devtools = FALSE,
   input,
   output,
   session,
@@ -22,7 +23,7 @@ mvu_server(
 
 \item{update}{A function with signature \verb{function(model, msg, value)} that
 takes the current model, a message type (string or \code{mvu_enum}), and an
-optional value, and returns a new model. Must be a pure function.}
+optional value, and returns a new model or an \code{\link[=mvu_result]{mvu_result()}}.}
 
 \item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. When
 provided, incoming message type strings are automatically validated
@@ -37,12 +38,16 @@ which sends the model as-is.}
 match the \code{component} argument used in \code{\link[=mvu_page]{mvu_page()}} or
 \code{\link[=mvu_module_ui]{mvu_module_ui()}}.}
 
-\item{on_msg}{An optional callback with signature
-\verb{function(model, type, value, session)} called before \code{update}. Receives
-the \code{reactiveVal} itself (not its value) for direct read/write. Return
-\code{FALSE} to skip the default \code{update} call; any other return value
-(including \code{NULL}) proceeds normally. Useful for side-effect-only
-messages.}
+\item{on_msg}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} An optional callback
+called before \code{update}. Use \code{\link[=mvu_result]{mvu_result()}} with effect constructors
+instead. When provided, receives \verb{(model, type, value, session)} where
+\code{model} is the \code{reactiveVal} itself. Return \code{FALSE} to skip \code{update}.}
+
+\item{devtools}{Logical. When \code{TRUE}, every transition is recorded and
+the return value changes to a list with \verb{$model} (reactiveVal),
+\verb{$log} (reactiveVal of \code{\link[=mvu_log]{mvu_log()}}), \verb{$travel_to} (function),
+\verb{$resume} (function), and \verb{$is_traveling} (reactiveVal). See the
+time-travel section below.}
 
 \item{input, output, session}{The Shiny session objects, passed from the
 server function.}
@@ -52,7 +57,8 @@ to set the correct channel name for \code{sendCustomMessage}. Do not use
 directly.}
 }
 \value{
-The model \code{reactiveVal}, allowing further reactive integration.
+When \code{devtools = FALSE} (default): the model \code{reactiveVal}.
+When \code{devtools = TRUE}: a list (see devtools section).
 }
 \description{
 The core reactive runtime that connects the Model-View-Update cycle.
@@ -60,12 +66,36 @@ Listens for messages from the Alpine.js client, passes them through the
 user-defined \code{update} function, and pushes the resulting frontend model
 back to the browser via \code{sendCustomMessage}.
 }
+\details{
+\code{update} may return either a plain model list (backward compatible) or
+an \code{\link[=mvu_result]{mvu_result()}} containing both a model and effects. When effects are
+present, the runtime executes them after updating the model.
+}
+\section{Time-travel debugging}{
+
+When \code{devtools = TRUE}, the returned list includes:
+\describe{
+\item{\code{travel_to(step)}}{Jump the UI to historical step \code{step}
+(0 = initial state, 1 = after first message, ...). While traveling,
+incoming messages are silently dropped.}
+\item{\code{resume()}}{Exit time-travel mode and restore the live model.}
+\item{\code{is_traveling}}{A \code{reactiveVal} that is \code{TRUE} while the
+runtime is in time-travel mode.}
+}
+}
+
 \examples{
 \dontrun{
 server <- function(input, output, session) {
   mvu_server(
     init = function() list(count = 0),
-    update = function(model, msg, value) model,
+    update = function(model, msg, value) {
+      switch(msg,
+        increment = list_set(model, count = model$count + 1),
+        save = mvu_result(model, effect_notify("Saved!")),
+        model
+      )
+    },
     input = input, output = output, session = session
   )
 }
