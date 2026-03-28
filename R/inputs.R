@@ -356,7 +356,7 @@ mvu_checkbox_input <- function(label, msg, value = NULL,
   if (!is.null(value)) attrs[["x-bind:checked"]] <- value
   div(class = class,
     do.call(tags$input, attrs),
-    tags$label(class = "form-check-label", `for` = input_id, label)
+    tags$label(class = "form-check-label ms-1", `for` = input_id, label)
   )
 }
 
@@ -406,7 +406,7 @@ mvu_checkbox_group_input <- function(label, choices, msg, selected = NULL,
     }
     div(class = check_class,
       do.call(tags$input, attrs),
-      tags$label(class = "form-check-label", `for` = input_id, lbl)
+      tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
     )
   }, nms, vals, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   tagList(
@@ -458,7 +458,7 @@ mvu_radio_input <- function(label, choices, msg, selected = NULL,
     }
     div(class = radio_class,
       do.call(tags$input, attrs),
-      tags$label(class = "form-check-label", `for` = input_id, lbl)
+      tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
     )
   }, nms, vals, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   tagList(

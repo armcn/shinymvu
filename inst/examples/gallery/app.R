@@ -422,7 +422,7 @@ gallery_server <- function(id) {
 # -- App -----------------------------------------------------------------------
 
 ui <- bslib::page_fillable(
-  theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
+  theme = bslib::bs_theme(version = 5),
   gallery_ui("gallery")
 )
 
