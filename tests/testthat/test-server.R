@@ -221,9 +221,9 @@ test_that("mvu_module_server with plain model return is backward compatible", {
   )
 })
 
-# --- Devtools ---------------------------------------------------------------
+# --- Debug ------------------------------------------------------------------
 
-test_that("mvu_module_server with devtools returns model and log", {
+test_that("mvu_module_server with debug returns model and log", {
   init <- function() list(count = 0)
   update <- function(model, msg, value) {
     list_set(model, count = model$count + 1)
@@ -231,7 +231,7 @@ test_that("mvu_module_server with devtools returns model and log", {
 
   shiny::testServer(
     mvu_module_server,
-    args = list(init = init, update = update, devtools = TRUE),
+    args = list(init = init, update = update, debug = TRUE),
     {
       runtime <- session$getReturned()
       expect_true(is.list(runtime))
@@ -244,7 +244,7 @@ test_that("mvu_module_server with devtools returns model and log", {
   )
 })
 
-test_that("mvu_module_server devtools records transitions", {
+test_that("mvu_module_server debug records transitions", {
   init <- function() list(count = 0)
   update <- function(model, msg, value) {
     list_set(model, count = model$count + 1)
@@ -252,7 +252,7 @@ test_that("mvu_module_server devtools records transitions", {
 
   shiny::testServer(
     mvu_module_server,
-    args = list(init = init, update = update, devtools = TRUE),
+    args = list(init = init, update = update, debug = TRUE),
     {
       runtime <- session$getReturned()
 
@@ -268,7 +268,7 @@ test_that("mvu_module_server devtools records transitions", {
   )
 })
 
-test_that("mvu_module_server devtools records effects", {
+test_that("mvu_module_server debug records effects", {
   init <- function() list(count = 0)
   update <- function(model, msg, value) {
     mvu_result(
@@ -279,7 +279,7 @@ test_that("mvu_module_server devtools records effects", {
 
   shiny::testServer(
     mvu_module_server,
-    args = list(init = init, update = update, devtools = TRUE),
+    args = list(init = init, update = update, debug = TRUE),
     {
       runtime <- session$getReturned()
 
@@ -291,7 +291,7 @@ test_that("mvu_module_server devtools records effects", {
   )
 })
 
-test_that("mvu_module_server devtools accumulates across messages", {
+test_that("mvu_module_server debug accumulates across messages", {
   init <- function() list(count = 0)
   update <- function(model, msg, value) {
     list_set(model, count = model$count + 1)
@@ -299,7 +299,7 @@ test_that("mvu_module_server devtools accumulates across messages", {
 
   shiny::testServer(
     mvu_module_server,
-    args = list(init = init, update = update, devtools = TRUE),
+    args = list(init = init, update = update, debug = TRUE),
     {
       runtime <- session$getReturned()
 

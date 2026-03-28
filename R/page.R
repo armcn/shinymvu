@@ -7,6 +7,9 @@
 #' @param ... UI elements to include inside the Alpine.js `x-data` container.
 #' @param component Character string naming the Alpine.js component. Defaults
 #'   to `"mvu"`. Must match the `component` argument in [mvu_server()].
+#' @param debug Logical. When `TRUE`, includes the built-in time-travel
+#'   debugger overlay. The corresponding [mvu_server()] call must also set
+#'   `debug = TRUE`.
 #' @param theme A [bslib::bs_theme()] object for Bootstrap theming.
 #' @param extra_js Optional JavaScript string to inject as additional
 #'   properties into the Alpine.js component definition.
@@ -26,7 +29,8 @@
 #' }
 #'
 #' @export
-mvu_page <- function(..., component = "mvu", theme = bslib::bs_theme(),
+mvu_page <- function(..., component = "mvu", debug = FALSE,
+                     theme = bslib::bs_theme(),
                      extra_js = NULL, extra_channels = NULL) {
   bslib::page_fillable(
     theme = theme,
@@ -39,7 +43,8 @@ mvu_page <- function(..., component = "mvu", theme = bslib::bs_theme(),
         defer = NA
       )
     ),
-    div(`x-data` = component, `x-cloak` = NA, ...)
+    div(`x-data` = component, `x-cloak` = NA, ...),
+    if (debug) debugger_ui("__dbg__")
   )
 }
 

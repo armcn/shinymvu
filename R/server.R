@@ -27,11 +27,12 @@
 #'   called before `update`. Use [mvu_result()] with effect constructors
 #'   instead. When provided, receives `(model, type, value, session)` where
 #'   `model` is the `reactiveVal` itself. Return `FALSE` to skip `update`.
-#' @param devtools Logical. When `TRUE`, every transition is recorded and
-#'   the return value changes to a list with `$model` (reactiveVal),
-#'   `$log` (reactiveVal of [mvu_log()]), `$travel_to` (function),
-#'   `$resume` (function), and `$is_traveling` (reactiveVal). See the
-#'   time-travel section below.
+#' @param debug Logical. When `TRUE`, every transition is recorded, a
+#'   built-in time-travel debugger overlay is shown, and the return value
+#'   changes to a list with `$model` (reactiveVal), `$log` (reactiveVal
+#'   of [mvu_log()]), `$travel_to` (function), `$resume` (function), and
+#'   `$is_traveling` (reactiveVal). The corresponding UI function
+#'   ([mvu_page()] or [mvu_module_ui()]) must also set `debug = TRUE`.
 #' @param input,output,session The Shiny session objects, passed from the
 #'   server function.
 #' @param .channel_component Internal parameter used by [mvu_module_server()]
@@ -39,7 +40,7 @@
 #'   directly.
 #'
 #' @section Time-travel debugging:
-#' When `devtools = TRUE`, the returned list includes:
+#' When `debug = TRUE`, the returned list includes:
 #' \describe{
 #'   \item{`travel_to(step)`}{Jump the UI to historical step `step`
 #'     (0 = initial state, 1 = after first message, ...). While traveling,
@@ -49,8 +50,8 @@
 #'     runtime is in time-travel mode.}
 #' }
 #'
-#' @return When `devtools = FALSE` (default): the model `reactiveVal`.
-#'   When `devtools = TRUE`: a list (see devtools section).
+#' @return When `debug = FALSE` (default): the model `reactiveVal`.
+#'   When `debug = TRUE`: a list (see Time-travel debugging section).
 #'
 #' @examples
 #' \dontrun{
@@ -71,7 +72,7 @@
 #'
 #' @export
 mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
-                       component = "mvu", on_msg = NULL, devtools = FALSE,
+                       component = "mvu", on_msg = NULL, debug = FALSE,
                        input, output, session,
                        .channel_component = component) {
   model_channel <- paste0(.channel_component, "__model")
@@ -91,15 +92,15 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
     push()
   })
 
-  log_rv <- if (devtools) reactiveVal(mvu_log()) else NULL
-  is_traveling <- if (devtools) reactiveVal(FALSE) else NULL
+  log_rv <- if (debug) reactiveVal(mvu_log()) else NULL
+  is_traveling <- if (debug) reactiveVal(FALSE) else NULL
   seq_counter <- 0L
   cached_models <- NULL
 
   msg_factory <- msg
 
   observeEvent(input[[msg_input]], {
-    if (devtools && isTRUE(isolate(is_traveling()))) return()
+    if (debug && isTRUE(isolate(is_traveling()))) return()
 
     raw <- input[[msg_input]]
     type <- raw$type
@@ -114,7 +115,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       if (isFALSE(proceed)) return()
     }
 
-    model_before <- if (devtools) model() else NULL
+    model_before <- if (debug) model() else NULL
 
     result <- update(model(), type, value)
 
@@ -127,7 +128,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       result_effects <- list()
     }
 
-    if (devtools) {
+    if (debug) {
       seq_counter <<- seq_counter + 1L
       trans <- mvu_transition(
         seq = seq_counter,
@@ -144,7 +145,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
     }
   })
 
-  if (devtools) {
+  if (debug) {
     travel_to_fn <- function(step) {
       log <- isolate(log_rv())
       n <- length(log$transitions)
@@ -168,13 +169,56 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       )
     }
 
-    list(
+    model_at_fn <- function(step) {
+      log <- isolate(log_rv())
+      n <- length(log$transitions)
+      step <- max(0L, min(as.integer(step), n))
+      if (step == 0L) return(init())
+      log$transitions[[step]]$model_after
+    }
+
+    import_fn <- function(messages) {
+      is_traveling(FALSE)
+      model(init())
+      seq_counter <<- 0L
+      new_transitions <- list()
+      for (m in messages) {
+        seq_counter <<- seq_counter + 1L
+        model_before <- model()
+        type <- m$type
+        value <- m$value
+        if (!is.null(msg_factory)) type <- msg_factory(type)
+        result <- update(model(), type, value)
+        if (is_mvu_result(result)) {
+          model(result$model)
+          effs <- result$effects
+        } else {
+          model(result)
+          effs <- list()
+        }
+        new_transitions <- c(new_transitions, list(mvu_transition(
+          seq = seq_counter, type = type, value = value,
+          model_before = model_before, model_after = model(),
+          effects = effs
+        )))
+      }
+      log_rv(mvu_log(new_transitions))
+      cached_models <<- NULL
+    }
+
+    runtime <- list(
       model = model,
       log = log_rv,
       travel_to = travel_to_fn,
       resume = resume_fn,
-      is_traveling = is_traveling
+      is_traveling = is_traveling,
+      model_at = model_at_fn,
+      import_log = import_fn
     )
+
+    debugger_server("__dbg__", runtime, init)
+
+    runtime
   } else {
     model
   }

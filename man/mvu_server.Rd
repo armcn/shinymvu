@@ -11,7 +11,7 @@ mvu_server(
   to_frontend = identity,
   component = "mvu",
   on_msg = NULL,
-  devtools = FALSE,
+  debug = FALSE,
   input,
   output,
   session,
@@ -43,11 +43,12 @@ called before \code{update}. Use \code{\link[=mvu_result]{mvu_result()}} with ef
 instead. When provided, receives \verb{(model, type, value, session)} where
 \code{model} is the \code{reactiveVal} itself. Return \code{FALSE} to skip \code{update}.}
 
-\item{devtools}{Logical. When \code{TRUE}, every transition is recorded and
-the return value changes to a list with \verb{$model} (reactiveVal),
-\verb{$log} (reactiveVal of \code{\link[=mvu_log]{mvu_log()}}), \verb{$travel_to} (function),
-\verb{$resume} (function), and \verb{$is_traveling} (reactiveVal). See the
-time-travel section below.}
+\item{debug}{Logical. When \code{TRUE}, every transition is recorded, a
+built-in time-travel debugger overlay is shown, and the return value
+changes to a list with \verb{$model} (reactiveVal), \verb{$log} (reactiveVal
+of \code{\link[=mvu_log]{mvu_log()}}), \verb{$travel_to} (function), \verb{$resume} (function), and
+\verb{$is_traveling} (reactiveVal). The corresponding UI function
+(\code{\link[=mvu_page]{mvu_page()}} or \code{\link[=mvu_module_ui]{mvu_module_ui()}}) must also set \code{debug = TRUE}.}
 
 \item{input, output, session}{The Shiny session objects, passed from the
 server function.}
@@ -57,8 +58,8 @@ to set the correct channel name for \code{sendCustomMessage}. Do not use
 directly.}
 }
 \value{
-When \code{devtools = FALSE} (default): the model \code{reactiveVal}.
-When \code{devtools = TRUE}: a list (see devtools section).
+When \code{debug = FALSE} (default): the model \code{reactiveVal}.
+When \code{debug = TRUE}: a list (see Time-travel debugging section).
 }
 \description{
 The core reactive runtime that connects the Model-View-Update cycle.
@@ -73,7 +74,7 @@ present, the runtime executes them after updating the model.
 }
 \section{Time-travel debugging}{
 
-When \code{devtools = TRUE}, the returned list includes:
+When \code{debug = TRUE}, the returned list includes:
 \describe{
 \item{\code{travel_to(step)}}{Jump the UI to historical step \code{step}
 (0 = initial state, 1 = after first message, ...). While traveling,

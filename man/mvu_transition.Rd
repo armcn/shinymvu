@@ -24,5 +24,5 @@ An \code{mvu_transition} S3 object.
 }
 \description{
 Captures a single state transition for debugging. Used internally by
-the runtime when \code{devtools = TRUE} and as input to \code{\link[=mvu_replay]{mvu_replay()}}.
+the runtime when \code{debug = TRUE} and as input to \code{\link[=mvu_replay]{mvu_replay()}}.
 }

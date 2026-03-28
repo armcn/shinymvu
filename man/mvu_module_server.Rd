@@ -12,7 +12,7 @@ mvu_module_server(
   to_frontend = identity,
   component = "mvu",
   on_msg = NULL,
-  devtools = FALSE
+  debug = FALSE
 )
 }
 \arguments{
@@ -36,12 +36,14 @@ match the \code{component} argument in \code{\link[=mvu_module_ui]{mvu_module_ui
 \item{on_msg}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Optional message hook.
 See \code{\link[=mvu_server]{mvu_server()}} for details.}
 
-\item{devtools}{Logical. When \code{TRUE}, records transitions. See
-\code{\link[=mvu_server]{mvu_server()}} for details on the changed return type.}
+\item{debug}{Logical. When \code{TRUE}, records transitions and starts the
+built-in time-travel debugger. The corresponding \code{\link[=mvu_module_ui]{mvu_module_ui()}}
+call must also set \code{debug = TRUE}. See \code{\link[=mvu_server]{mvu_server()}} for details
+on the changed return type.}
 }
 \value{
 See \code{\link[=mvu_server]{mvu_server()}} — the model \code{reactiveVal} (default) or a list
-with \verb{$model} and \verb{$log} when \code{devtools = TRUE}.
+with \verb{$model} and \verb{$log} when \code{debug = TRUE}.
 }
 \description{
 Server-side counterpart to \code{\link[=mvu_module_ui]{mvu_module_ui()}}. Wraps \code{\link[=mvu_server]{mvu_server()}} inside

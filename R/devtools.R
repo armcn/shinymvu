@@ -1,7 +1,7 @@
 #' Create a Transition Record
 #'
 #' Captures a single state transition for debugging. Used internally by
-#' the runtime when `devtools = TRUE` and as input to [mvu_replay()].
+#' the runtime when `debug = TRUE` and as input to [mvu_replay()].
 #'
 #' @param seq Integer sequence number.
 #' @param type The message type (character or `mvu_enum`).
