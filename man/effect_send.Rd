@@ -17,7 +17,7 @@ An \code{mvu_effect} object.
 \description{
 Describes a \link[shiny:session]{shiny::session}\verb{$sendCustomMessage()} call. Use this to
 send data to client-side JavaScript handlers registered via
-\code{extra_channels} in \code{\link[=mvu_page]{mvu_page()}} or \code{\link[=mvu_bridge_js]{mvu_bridge_js()}}.
+\code{extra_channels} in \code{\link[=mvu_module_ui]{mvu_module_ui()}}.
 }
 \examples{
 effect_send("clipboard", "text to copy")

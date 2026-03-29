@@ -13,7 +13,7 @@ debugger_ui(id)
 An \code{\link[htmltools:tagList]{htmltools::tagList()}} containing the debugger overlay.
 }
 \description{
-Creates the time-travel debugger overlay panel. Used internally when
-\code{debug = TRUE} is set on \code{\link[=mvu_module_ui]{mvu_module_ui()}} or \code{\link[=mvu_page]{mvu_page()}}.
+Creates the time-travel debugger overlay panel. Injected automatically
+via \code{\link[shiny:insertUI]{shiny::insertUI()}} when \code{debug = TRUE} is set on \code{\link[=mvu_module_server]{mvu_module_server()}}.
 }
 \keyword{internal}

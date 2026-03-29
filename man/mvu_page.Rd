@@ -7,7 +7,6 @@
 mvu_page(
   ...,
   component = "mvu",
-  debug = FALSE,
   theme = bslib::bs_theme(),
   extra_js = NULL,
   extra_channels = NULL
@@ -16,37 +15,20 @@ mvu_page(
 \arguments{
 \item{...}{UI elements to include inside the Alpine.js \code{x-data} container.}
 
-\item{component}{Character string naming the Alpine.js component. Defaults
-to \code{"mvu"}. Must match the \code{component} argument in \code{\link[=mvu_server]{mvu_server()}}.}
+\item{component}{Alpine.js component name.}
 
-\item{debug}{Logical. When \code{TRUE}, includes the built-in time-travel
-debugger overlay. The corresponding \code{\link[=mvu_server]{mvu_server()}} call must also set
-\code{debug = TRUE}.}
+\item{theme}{A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object.}
 
-\item{theme}{A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object for Bootstrap theming.}
+\item{extra_js}{Optional JavaScript string for the Alpine.js component.}
 
-\item{extra_js}{Optional JavaScript string to inject as additional
-properties into the Alpine.js component definition.}
-
-\item{extra_channels}{A named list of additional Shiny custom message
-handlers. Names are channel names; values are JavaScript code strings
-executed when a message arrives on that channel (receives \code{data}).}
+\item{extra_channels}{Named list of additional Shiny message handlers.}
 }
 \value{
 A \code{\link[bslib:page_fillable]{bslib::page_fillable()}} UI definition.
 }
 \description{
 Wraps UI content with the Alpine.js CDN script, the client-server bridge
-JavaScript, and x-cloak CSS. This is the top-level UI function for
-standalone (non-module) MVU applications.
+JavaScript, and x-cloak CSS. Prefer \code{\link[=mvu_module_ui]{mvu_module_ui()}} inside a standard
+Shiny page function instead.
 }
-\examples{
-\dontrun{
-ui <- mvu_page(
-  shiny::div(class = "container",
-    shiny::tags$h1("Hello MVU")
-  )
-)
-}
-
-}
+\keyword{internal}

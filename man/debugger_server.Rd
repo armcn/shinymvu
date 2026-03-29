@@ -9,13 +9,12 @@ debugger_server(id, runtime, init)
 \arguments{
 \item{id}{Module ID matching the \code{\link[=debugger_ui]{debugger_ui()}} call.}
 
-\item{runtime}{The runtime list returned by \code{\link[=mvu_server]{mvu_server()}} when
-\code{debug = TRUE}.}
+\item{runtime}{The runtime list produced when \code{debug = TRUE}.}
 
 \item{init}{The init function used by the MVU component.}
 }
 \description{
 Wires up the time-travel debugger to an MVU runtime. Used internally
-when \code{debug = TRUE} is set on \code{\link[=mvu_module_server]{mvu_module_server()}} or \code{\link[=mvu_server]{mvu_server()}}.
+when \code{debug = TRUE} is set on \code{\link[=mvu_module_server]{mvu_module_server()}}.
 }
 \keyword{internal}

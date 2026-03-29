@@ -93,7 +93,7 @@ effect_notify <- function(text, type = "default", duration = 5) {
 #'
 #' Describes a [shiny::session]`$sendCustomMessage()` call. Use this to
 #' send data to client-side JavaScript handlers registered via
-#' `extra_channels` in [mvu_page()] or [mvu_bridge_js()].
+#' `extra_channels` in [mvu_module_ui()].
 #'
 #' @param channel The custom message channel name.
 #' @param data The data to send (will be serialized to JSON).

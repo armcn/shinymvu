@@ -8,9 +8,6 @@
 #' @param ... UI elements to include inside the Alpine.js `x-data` container.
 #' @param component Character string naming the Alpine.js component. Defaults
 #'   to `"mvu"`.
-#' @param debug Logical. When `TRUE`, includes the built-in time-travel
-#'   debugger overlay. The corresponding [mvu_module_server()] call must
-#'   also set `debug = TRUE`.
 #' @param theme A [bslib::bs_theme()] object for Bootstrap theming.
 #' @param extra_js Optional JavaScript string for additional Alpine.js
 #'   component properties.
@@ -30,7 +27,7 @@
 #' }
 #'
 #' @export
-mvu_module_ui <- function(id, ..., component = "mvu", debug = FALSE,
+mvu_module_ui <- function(id, ..., component = "mvu",
                           theme = bslib::bs_theme(),
                           extra_js = NULL, extra_channels = NULL) {
   ns <- NS(id)
@@ -43,37 +40,40 @@ mvu_module_ui <- function(id, ..., component = "mvu", debug = FALSE,
       src = "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js",
       defer = NA
     ),
-    div(`x-data` = js_name, `x-cloak` = NA, ...),
-    if (debug) debugger_ui(ns("__dbg__"))
+    div(`x-data` = js_name, `x-cloak` = NA, ...)
   )
 }
 
 #' MVU Module Server
 #'
-#' Server-side counterpart to [mvu_module_ui()]. Wraps [mvu_server()] inside
-#' [shiny::moduleServer()] with correct namespace handling for message
-#' channels.
+#' Server-side counterpart to [mvu_module_ui()]. Runs the Model-View-Update
+#' reactive loop inside [shiny::moduleServer()].
 #'
 #' @param id The module ID string (must match the `id` in [mvu_module_ui()]).
-#' @param init A function returning the initial model.
+#' @param init A function returning the initial model (a list).
 #' @param update A function with signature `function(model, msg, value)` that
-#'   returns a new model or an [mvu_result()].
-#' @param msg An optional enum factory created by [mvu_enum()]. See
-#'   [mvu_server()] for details.
+#'   takes the current model, a message type (string or `mvu_enum`), and an
+#'   optional value, and returns a new model or an [mvu_result()].
+#' @param msg An optional enum factory created by [mvu_enum()]. When
+#'   provided, incoming message type strings are automatically validated
+#'   and converted to `mvu_enum` objects before being passed to `update`.
 #' @param to_frontend A function with signature `function(model)` that
-#'   projects the model into a JSON-serializable list for the client.
-#'   Defaults to [identity()].
+#'   projects the server-side model into a JSON-serializable list for the
+#'   client. May include derived display values. Defaults to [identity()],
+#'   which sends the model as-is.
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument in [mvu_module_ui()].
 #' @param on_msg `r lifecycle::badge("deprecated")` Optional message hook.
-#'   See [mvu_server()] for details.
-#' @param debug Logical. When `TRUE`, records transitions and starts the
-#'   built-in time-travel debugger. The corresponding [mvu_module_ui()]
-#'   call must also set `debug = TRUE`. See [mvu_server()] for details
-#'   on the changed return type.
+#'   Use [mvu_result()] with effect constructors instead.
+#' @param debug Logical. When `TRUE`, every transition is recorded and the
+#'   built-in time-travel debugger overlay is injected into the page. The
+#'   return value changes to a list with `$model` (reactiveVal), `$log`
+#'   (reactiveVal of [mvu_log()]), `$travel_to` (function), `$resume`
+#'   (function), and `$is_traveling` (reactiveVal).
 #'
-#' @return See [mvu_server()] — the model `reactiveVal` (default) or a list
-#'   with `$model` and `$log` when `debug = TRUE`.
+#' @return When `debug = FALSE` (default): the model `reactiveVal`.
+#'   When `debug = TRUE`: a list with `$model`, `$log`, `$travel_to`,
+#'   `$resume`, and `$is_traveling`.
 #'
 #' @examples
 #' \dontrun{

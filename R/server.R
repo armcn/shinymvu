@@ -1,76 +1,23 @@
 #' MVU Server Runtime Loop
 #'
 #' The core reactive runtime that connects the Model-View-Update cycle.
-#' Listens for messages from the Alpine.js client, passes them through the
-#' user-defined `update` function, and pushes the resulting frontend model
-#' back to the browser via `sendCustomMessage`.
-#'
-#' `update` may return either a plain model list (backward compatible) or
-#' an [mvu_result()] containing both a model and effects. When effects are
-#' present, the runtime executes them after updating the model.
+#' Called internally by [mvu_module_server()].
 #'
 #' @param init A function returning the initial model (a list).
-#' @param update A function with signature `function(model, msg, value)` that
-#'   takes the current model, a message type (string or `mvu_enum`), and an
-#'   optional value, and returns a new model or an [mvu_result()].
-#' @param msg An optional enum factory created by [mvu_enum()]. When
-#'   provided, incoming message type strings are automatically validated
-#'   and converted to `mvu_enum` objects before being passed to `update`.
-#' @param to_frontend A function with signature `function(model)` that
-#'   projects the server-side model into a JSON-serializable list for the
-#'   client. May include derived display values. Defaults to [identity()],
-#'   which sends the model as-is.
-#' @param component Character string naming the Alpine.js component. Must
-#'   match the `component` argument used in [mvu_page()] or
-#'   [mvu_module_ui()].
-#' @param on_msg `r lifecycle::badge("deprecated")` An optional callback
-#'   called before `update`. Use [mvu_result()] with effect constructors
-#'   instead. When provided, receives `(model, type, value, session)` where
-#'   `model` is the `reactiveVal` itself. Return `FALSE` to skip `update`.
-#' @param debug Logical. When `TRUE`, every transition is recorded, a
-#'   built-in time-travel debugger overlay is shown, and the return value
-#'   changes to a list with `$model` (reactiveVal), `$log` (reactiveVal
-#'   of [mvu_log()]), `$travel_to` (function), `$resume` (function), and
-#'   `$is_traveling` (reactiveVal). The corresponding UI function
-#'   ([mvu_page()] or [mvu_module_ui()]) must also set `debug = TRUE`.
-#' @param input,output,session The Shiny session objects, passed from the
-#'   server function.
-#' @param .channel_component Internal parameter used by [mvu_module_server()]
-#'   to set the correct channel name for `sendCustomMessage`. Do not use
-#'   directly.
+#' @param update A function with signature `function(model, msg, value)`.
+#' @param msg An optional enum factory created by [mvu_enum()].
+#' @param to_frontend A function projecting the model for the client.
+#' @param component Alpine.js component name.
+#' @param on_msg Deprecated message hook.
+#' @param debug Logical. When `TRUE`, records transitions and injects the
+#'   time-travel debugger.
+#' @param input,output,session Shiny session objects.
+#' @param .channel_component Internal channel name override.
 #'
-#' @section Time-travel debugging:
-#' When `debug = TRUE`, the returned list includes:
-#' \describe{
-#'   \item{`travel_to(step)`}{Jump the UI to historical step `step`
-#'     (0 = initial state, 1 = after first message, ...). While traveling,
-#'     incoming messages are silently dropped.}
-#'   \item{`resume()`}{Exit time-travel mode and restore the live model.}
-#'   \item{`is_traveling`}{A `reactiveVal` that is `TRUE` while the
-#'     runtime is in time-travel mode.}
-#' }
+#' @return When `debug = FALSE`: the model `reactiveVal`.
+#'   When `debug = TRUE`: a runtime list.
 #'
-#' @return When `debug = FALSE` (default): the model `reactiveVal`.
-#'   When `debug = TRUE`: a list (see Time-travel debugging section).
-#'
-#' @examples
-#' \dontrun{
-#' server <- function(input, output, session) {
-#'   mvu_server(
-#'     init = function() list(count = 0),
-#'     update = function(model, msg, value) {
-#'       switch(msg,
-#'         increment = list_set(model, count = model$count + 1),
-#'         save = mvu_result(model, effect_notify("Saved!")),
-#'         model
-#'       )
-#'     },
-#'     input = input, output = output, session = session
-#'   )
-#' }
-#' }
-#'
-#' @export
+#' @keywords internal
 mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
                        component = "mvu", on_msg = NULL, debug = FALSE,
                        input, output, session,
@@ -216,6 +163,13 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       import_log = import_fn
     )
 
+    shiny::insertUI(
+      selector = "body",
+      where = "beforeEnd",
+      ui = debugger_ui(session$ns("__dbg__")),
+      immediate = TRUE,
+      session = session
+    )
     debugger_server("__dbg__", runtime, init)
 
     runtime

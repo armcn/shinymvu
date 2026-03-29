@@ -5,11 +5,16 @@
 
 ## Overview
 
-shinymvu implements the [Model-View-Update](https://guide.elm-lang.org/architecture/)
-pattern for Shiny. Your entire component state lives in one list, and
-there is exactly one way to change it -- a pure `update` function that
-takes the current state and a message and returns the new state. No
-`reactiveVal`, no `observeEvent`, no side effects.
+shinymvu brings the
+[Model-View-Update](https://guide.elm-lang.org/architecture/) pattern to
+Shiny. All state lives in one list, and the only way to change it is a
+pure `update` function that takes the current state and a message and
+returns the new state.
+
+An MVU component is a standard Shiny module. You can drop one into a
+corner of an existing app to try it out, use several side by side, or
+let a single module own your entire app. Start small -- if you like it,
+use more.
 
 ## Installation
 
@@ -50,6 +55,56 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
+## Try it in part of an app
+
+Because each MVU component is a Shiny module, it slots into any
+existing app without touching the rest of your code.
+`mvu_module_server()` returns the model as a `reactiveVal`, so the
+rest of your app can read it like any other reactive source:
+
+```r
+mod_slider_ui <- function(id) {
+  mvu_module_ui(id,
+    mvu_slider_input(
+      "Rows to show", 
+      min = 1, 
+      max = 32,
+      msg = "set_n", 
+      value = "model.n"
+    )
+  )
+}
+
+mod_slider_server <- function(id) {
+  init <- function() list(n = 10)
+
+  update <- function(model, msg, value) {
+    switch(msg, set_n = list_set(model, n = value))
+  }
+
+  mvu_module_server(id, init = init, update = update)
+}
+
+ui <- fluidPage(
+  mod_slider_ui("controls"),
+  tableOutput("table")
+)
+
+server <- function(input, output, session) {
+  model <- mod_slider_server("controls")
+
+  output$table <- renderTable({
+    head(mtcars, model()$n)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+The MVU module manages the slider state; regular Shiny reads it like
+any other reactive value. Add more modules, or let one module own the
+whole page -- the API is the same either way.
+
 ## Key features
 
 **One source of truth.** All state for a component lives in a single
@@ -57,11 +112,10 @@ list. No hunting through server functions to find which `reactiveVal`
 holds what.
 
 **Changes are explicit.** State only changes when `update` returns a new
-list. Every possible state transition is in one function. No reactive
-chain mysteries.
+list. Every possible state transition is in one function.
 
-**Testing without Shiny.** Because `update` is a pure function, you can
-test your entire app logic with plain unit tests:
+**Testing without Shiny.** Because `update` is pure, you can test your
+app logic with plain unit tests:
 
 ```r
 test_that("increment increases the count", {
@@ -78,12 +132,13 @@ test_that("increment increases the count", {
 you to handle every message type. Add a new message and forget to handle
 it? You get an error, not a silent bug.
 
-**Time-travel debugging.** Set `debug = TRUE` to get a built-in debugger
-overlay that records every state transition, lets you step back and
-forward through history, inspect the model, and import/export sessions.
+**Time-travel debugging.** Set `debug = TRUE` in `mvu_module_server()`
+to get a built-in debugger overlay that records every state transition,
+lets you step back and forward through history, inspect the model, and
+import/export sessions.
 
-**Inputs.** The package provides wrappers for standard Shiny inputs that
-dispatch MVU messages instead of using `inputId`:
+**Inputs.** Wrappers for standard Shiny inputs that dispatch MVU
+messages instead of using `inputId`:
 
 ```r
 mvu_button("Submit", msg = "submit")

@@ -360,7 +360,7 @@ ui <- bslib::page_fillable(
   theme = bslib::bs_theme(),
   padding = 0,
   tags$head(tags$style(HTML(todomvc_css))),
-  mvu_module_ui("todo", debug = TRUE, extra_js = extra_js,
+  mvu_module_ui("todo", extra_js = extra_js,
     div(class = "todomvc-wrapper",
       tags$section(class = "todoapp",
 

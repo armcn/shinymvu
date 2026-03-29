@@ -349,8 +349,8 @@ model_tree_html <- function(obj, name = NULL) {
 
 #' Debugger Overlay UI
 #'
-#' Creates the time-travel debugger overlay panel. Used internally when
-#' `debug = TRUE` is set on [mvu_module_ui()] or [mvu_page()].
+#' Creates the time-travel debugger overlay panel. Injected automatically
+#' via [shiny::insertUI()] when `debug = TRUE` is set on [mvu_module_server()].
 #'
 #' @param id Module ID for the debugger.
 #'
@@ -415,11 +415,10 @@ debugger_ui <- function(id) {
 #' Debugger Server Module
 #'
 #' Wires up the time-travel debugger to an MVU runtime. Used internally
-#' when `debug = TRUE` is set on [mvu_module_server()] or [mvu_server()].
+#' when `debug = TRUE` is set on [mvu_module_server()].
 #'
 #' @param id Module ID matching the [debugger_ui()] call.
-#' @param runtime The runtime list returned by [mvu_server()] when
-#'   `debug = TRUE`.
+#' @param runtime The runtime list produced when `debug = TRUE`.
 #' @param init The init function used by the MVU component.
 #'
 #' @keywords internal

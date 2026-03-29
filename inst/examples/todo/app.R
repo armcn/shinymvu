@@ -83,10 +83,12 @@ to_frontend <- function(model) {
 
 # --- UI ---------------------------------------------------------------------
 
-ui <- mvu_page(
-  extra_js = "newTodo: ''",
-  component = "todo",
-  div(class = "container py-4", style = "max-width: 520px;",
+ui <- bslib::page_fillable(
+  theme = bslib::bs_theme(),
+  padding = 0,
+  mvu_module_ui("todo",
+    extra_js = "newTodo: ''",
+    div(class = "container py-4", style = "max-width: 520px;",
     tags$h2(class = "mb-4 text-center", "Todo MVU"),
 
     # Input row
@@ -165,27 +167,17 @@ ui <- mvu_page(
       )
     )
   )
+  )
 )
 
 # --- Server -----------------------------------------------------------------
 
 server <- function(input, output, session) {
-  runtime <- mvu_server(
+  mvu_module_server("todo",
     init = init,
     update = update,
-    to_frontend = to_frontend,
-    component = "todo",
-    devtools = TRUE,
-    input = input, output = output, session = session
+    to_frontend = to_frontend
   )
-
-  observe({
-    log <- runtime$log()
-    if (length(log$transitions) > 0) {
-      cat("\n--- Transition Log ---\n")
-      print(log)
-    }
-  })
 }
 
 shinyApp(ui, server)

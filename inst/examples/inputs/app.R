@@ -81,17 +81,19 @@ to_frontend <- function(model) {
 
 # --- UI ---------------------------------------------------------------------
 
-ui <- mvu_page(
-  component = "app",
-  extra_js = "
-    searchText: '',
-    userName: '',
-    userBio: '',
-    saveName: '',
-    saveBio: ''
-  ",
-
-  div(class = "container py-4", style = "max-width: 900px;",
+ui <- bslib::page_fillable(
+  theme = bslib::bs_theme(),
+  padding = 0,
+  mvu_module_ui("app",
+    component = "app",
+    extra_js = "
+      searchText: '',
+      userName: '',
+      userBio: '',
+      saveName: '',
+      saveBio: ''
+    ",
+    div(class = "container py-4", style = "max-width: 900px;",
     tags$h4("shinymvu input patterns", class = "mb-4"),
 
     bslib::layout_columns(
@@ -240,18 +242,18 @@ ui <- mvu_page(
       )
     )
   )
+  )
 )
 
 # --- Server -----------------------------------------------------------------
 
 server <- function(input, output, session) {
-  mvu_server(
+  mvu_module_server("app",
     init = init,
     update = update,
     msg = Msg,
     to_frontend = to_frontend,
-    component = "app",
-    input = input, output = output, session = session
+    component = "app"
   )
 }
 

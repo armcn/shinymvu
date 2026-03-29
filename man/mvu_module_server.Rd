@@ -18,37 +18,41 @@ mvu_module_server(
 \arguments{
 \item{id}{The module ID string (must match the \code{id} in \code{\link[=mvu_module_ui]{mvu_module_ui()}}).}
 
-\item{init}{A function returning the initial model.}
+\item{init}{A function returning the initial model (a list).}
 
 \item{update}{A function with signature \verb{function(model, msg, value)} that
-returns a new model or an \code{\link[=mvu_result]{mvu_result()}}.}
+takes the current model, a message type (string or \code{mvu_enum}), and an
+optional value, and returns a new model or an \code{\link[=mvu_result]{mvu_result()}}.}
 
-\item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. See
-\code{\link[=mvu_server]{mvu_server()}} for details.}
+\item{msg}{An optional enum factory created by \code{\link[=mvu_enum]{mvu_enum()}}. When
+provided, incoming message type strings are automatically validated
+and converted to \code{mvu_enum} objects before being passed to \code{update}.}
 
 \item{to_frontend}{A function with signature \verb{function(model)} that
-projects the model into a JSON-serializable list for the client.
-Defaults to \code{\link[=identity]{identity()}}.}
+projects the server-side model into a JSON-serializable list for the
+client. May include derived display values. Defaults to \code{\link[=identity]{identity()}},
+which sends the model as-is.}
 
 \item{component}{Character string naming the Alpine.js component. Must
 match the \code{component} argument in \code{\link[=mvu_module_ui]{mvu_module_ui()}}.}
 
 \item{on_msg}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Optional message hook.
-See \code{\link[=mvu_server]{mvu_server()}} for details.}
+Use \code{\link[=mvu_result]{mvu_result()}} with effect constructors instead.}
 
-\item{debug}{Logical. When \code{TRUE}, records transitions and starts the
-built-in time-travel debugger. The corresponding \code{\link[=mvu_module_ui]{mvu_module_ui()}}
-call must also set \code{debug = TRUE}. See \code{\link[=mvu_server]{mvu_server()}} for details
-on the changed return type.}
+\item{debug}{Logical. When \code{TRUE}, every transition is recorded and the
+built-in time-travel debugger overlay is injected into the page. The
+return value changes to a list with \verb{$model} (reactiveVal), \verb{$log}
+(reactiveVal of \code{\link[=mvu_log]{mvu_log()}}), \verb{$travel_to} (function), \verb{$resume}
+(function), and \verb{$is_traveling} (reactiveVal).}
 }
 \value{
-See \code{\link[=mvu_server]{mvu_server()}} — the model \code{reactiveVal} (default) or a list
-with \verb{$model} and \verb{$log} when \code{debug = TRUE}.
+When \code{debug = FALSE} (default): the model \code{reactiveVal}.
+When \code{debug = TRUE}: a list with \verb{$model}, \verb{$log}, \verb{$travel_to},
+\verb{$resume}, and \verb{$is_traveling}.
 }
 \description{
-Server-side counterpart to \code{\link[=mvu_module_ui]{mvu_module_ui()}}. Wraps \code{\link[=mvu_server]{mvu_server()}} inside
-\code{\link[shiny:moduleServer]{shiny::moduleServer()}} with correct namespace handling for message
-channels.
+Server-side counterpart to \code{\link[=mvu_module_ui]{mvu_module_ui()}}. Runs the Model-View-Update
+reactive loop inside \code{\link[shiny:moduleServer]{shiny::moduleServer()}}.
 }
 \examples{
 \dontrun{

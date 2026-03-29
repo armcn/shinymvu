@@ -8,7 +8,6 @@ mvu_module_ui(
   id,
   ...,
   component = "mvu",
-  debug = FALSE,
   theme = bslib::bs_theme(),
   extra_js = NULL,
   extra_channels = NULL
@@ -21,10 +20,6 @@ mvu_module_ui(
 
 \item{component}{Character string naming the Alpine.js component. Defaults
 to \code{"mvu"}.}
-
-\item{debug}{Logical. When \code{TRUE}, includes the built-in time-travel
-debugger overlay. The corresponding \code{\link[=mvu_module_server]{mvu_module_server()}} call must
-also set \code{debug = TRUE}.}
 
 \item{theme}{A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object for Bootstrap theming.}
 
