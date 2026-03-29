@@ -38,7 +38,9 @@ custom JavaScript with \code{on_click_expr}.
 }
 \examples{
 mvu_file_input("Upload CSV", msg = "upload", accept = ".csv")
-mvu_file_input("Photos", msg = "upload_photos",
-  accept = "image/*", multiple = TRUE)
+mvu_file_input("Photos",
+  msg = "upload_photos",
+  accept = "image/*", multiple = TRUE
+)
 
 }

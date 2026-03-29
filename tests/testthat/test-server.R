@@ -122,7 +122,8 @@ test_that("mvu_module_server msg parameter auto-converts strings to enum", {
   check_msg <- mvu_enum(c("increment", "decrement"))
   init <- function() list(count = 0)
   update <- function(model, msg, value) {
-    match_enum(msg,
+    match_enum(
+      msg,
       "increment" ~ list_set(model, count = model$count + 1),
       "decrement" ~ list_set(model, count = model$count - 1)
     )
@@ -164,8 +165,10 @@ test_that("mvu_module_server msg parameter rejects invalid messages", {
 })
 
 test_that("mvu_module_ui generates correct structure", {
-  ui <- mvu_module_ui("test_counter",
-    shiny::tags$p("content"))
+  ui <- mvu_module_ui(
+    "test_counter",
+    shiny::tags$p("content")
+  )
   html <- as.character(ui)
   expect_match(html, "x-data")
   expect_match(html, "x-cloak")

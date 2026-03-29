@@ -40,7 +40,9 @@ A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
 A number \verb{<input>} that dispatches its numeric value as an MVU message.
 }
 \examples{
-mvu_numeric_input("Age", msg = "set_age", value = "model.age",
-  min = 0, max = 120)
+mvu_numeric_input("Age",
+  msg = "set_age", value = "model.age",
+  min = 0, max = 120
+)
 
 }

@@ -78,7 +78,8 @@ test_that("print.mvu_log handles empty log", {
 
 test_that("print.mvu_log shows effect count", {
   t <- mvu_transition(1, "save", NULL, list(), list(),
-    effects = list(effect_notify("done")))
+    effects = list(effect_notify("done"))
+  )
   l <- mvu_log(list(t))
   expect_output(print(l), "effect")
 })

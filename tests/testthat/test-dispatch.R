@@ -88,10 +88,11 @@ test_that("mvu_dispatch works with enum-based update", {
   Msg <- mvu_enum(c("increment", "decrement", "reset"))
   update <- function(model, msg, value) {
     msg <- Msg(msg)
-    match_enum(msg,
+    match_enum(
+      msg,
       "increment" ~ list_set(model, count = model$count + 1),
       "decrement" ~ list_set(model, count = model$count - 1),
-      "reset"     ~ list_set(model, count = 0)
+      "reset" ~ list_set(model, count = 0)
     )
   }
   result <- mvu_dispatch(

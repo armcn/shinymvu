@@ -39,7 +39,9 @@ list_set <- function(.l, ...) {
 #' @export
 list_get_in <- function(.l, .path) {
   for (key in .path) {
-    if (!is.list(.l) || is.null(.l[[key]])) return(NULL)
+    if (!is.list(.l) || is.null(.l[[key]])) {
+      return(NULL)
+    }
     .l <- .l[[key]]
   }
   .l
@@ -66,7 +68,9 @@ list_get_in <- function(.l, .path) {
 #'
 #' @export
 list_set_in <- function(.l, .path, .value) {
-  if (length(.path) == 0L) return(.value)
+  if (length(.path) == 0L) {
+    return(.value)
+  }
   if (length(.path) == 1L) {
     .l[[.path]] <- .value
     return(.l)

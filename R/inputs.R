@@ -1,13 +1,20 @@
 # -- Internal helpers ----------------------------------------------------------
 
 send_js <- function(msg, value_expr = NULL) {
-  if (is.null(value_expr)) sprintf("send('%s')", msg)
-  else sprintf("send('%s', %s)", msg, value_expr)
+  if (is.null(value_expr)) {
+    sprintf("send('%s')", msg)
+  } else {
+    sprintf("send('%s', %s)", msg, value_expr)
+  }
 }
 
 static_value_js <- function(value) {
-  if (is.null(value)) return(NULL)
-  if (is.character(value)) return(sprintf("'%s'", value))
+  if (is.null(value)) {
+    return(NULL)
+  }
+  if (is.character(value)) {
+    return(sprintf("'%s'", value))
+  }
   as.character(jsonlite::toJSON(value, auto_unbox = TRUE))
 }
 
@@ -77,7 +84,8 @@ on_click_expr <- function(msg, value_expr) {
 #' @return A named list with one event attribute.
 #'
 #' @examples
-#' shiny::tags$select(!!!on_input("set_color"),
+#' shiny::tags$select(
+#'   !!!on_input("set_color"),
 #'   shiny::tags$option(value = "red", "Red"),
 #'   shiny::tags$option(value = "blue", "Blue")
 #' )
@@ -123,8 +131,10 @@ on_check <- function(msg) {
 #' @return A named list with one event attribute.
 #'
 #' @examples
-#' shiny::tags$input(type = "range", min = "0", max = "100",
-#'   !!!on_input_num("set_volume"))
+#' shiny::tags$input(
+#'   type = "range", min = "0", max = "100",
+#'   !!!on_input_num("set_volume")
+#' )
 #'
 #' @export
 on_input_num <- function(msg, debounce = NULL) {
@@ -211,8 +221,10 @@ mvu_text_input <- function(label, msg, value = NULL, placeholder = NULL,
 #' @return A [htmltools::tagList()] with label and input.
 #'
 #' @examples
-#' mvu_numeric_input("Age", msg = "set_age", value = "model.age",
-#'   min = 0, max = 120)
+#' mvu_numeric_input("Age",
+#'   msg = "set_age", value = "model.age",
+#'   min = 0, max = 120
+#' )
 #'
 #' @export
 mvu_numeric_input <- function(label, msg, value = NULL,
@@ -310,7 +322,8 @@ mvu_textarea_input <- function(label, msg, value = NULL, rows = 3,
 #' @examples
 #' mvu_select_input("Color",
 #'   choices = c("Red" = "red", "Green" = "green", "Blue" = "blue"),
-#'   msg = "set_color", selected = "model.color")
+#'   msg = "set_color", selected = "model.color"
+#' )
 #'
 #' @export
 mvu_select_input <- function(label, choices, msg, selected = NULL,
@@ -354,7 +367,8 @@ mvu_checkbox_input <- function(label, msg, value = NULL,
     list(...)
   )
   if (!is.null(value)) attrs[["x-bind:checked"]] <- value
-  div(class = class,
+  div(
+    class = class,
     do.call(tags$input, attrs),
     tags$label(class = "form-check-label ms-1", `for` = input_id, label)
   )
@@ -381,7 +395,8 @@ mvu_checkbox_input <- function(label, msg, value = NULL,
 #' @examples
 #' mvu_checkbox_group_input("Toppings",
 #'   choices = c("Cheese", "Peppers", "Onions"),
-#'   msg = "toggle_topping", selected = "model.toppings")
+#'   msg = "toggle_topping", selected = "model.toppings"
+#' )
 #'
 #' @export
 mvu_checkbox_group_input <- function(label, choices, msg, selected = NULL,
@@ -404,7 +419,8 @@ mvu_checkbox_group_input <- function(label, choices, msg, selected = NULL,
         "%s.includes('%s')", selected, val
       )
     }
-    div(class = check_class,
+    div(
+      class = check_class,
       do.call(tags$input, attrs),
       tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
     )
@@ -434,7 +450,8 @@ mvu_checkbox_group_input <- function(label, choices, msg, selected = NULL,
 #' @examples
 #' mvu_radio_input("Pet",
 #'   choices = c("Dog" = "dog", "Cat" = "cat", "Fish" = "fish"),
-#'   msg = "set_pet", selected = "model.pet")
+#'   msg = "set_pet", selected = "model.pet"
+#' )
 #'
 #' @export
 mvu_radio_input <- function(label, choices, msg, selected = NULL,
@@ -456,7 +473,8 @@ mvu_radio_input <- function(label, choices, msg, selected = NULL,
     if (!is.null(selected)) {
       attrs[["x-bind:checked"]] <- sprintf("%s === '%s'", selected, val)
     }
-    div(class = radio_class,
+    div(
+      class = radio_class,
       do.call(tags$input, attrs),
       tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
     )
@@ -483,8 +501,10 @@ mvu_radio_input <- function(label, choices, msg, selected = NULL,
 #' @return A [htmltools::tagList()] with label and range input.
 #'
 #' @examples
-#' mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume",
-#'   value = "model.volume")
+#' mvu_slider_input("Volume",
+#'   min = 0, max = 100, msg = "set_volume",
+#'   value = "model.volume"
+#' )
 #'
 #' @export
 mvu_slider_input <- function(label, min, max, msg, value = NULL, step = 1,
@@ -562,7 +582,8 @@ mvu_date_input <- function(label, msg, value = NULL, min = NULL, max = NULL,
 #' @examples
 #' mvu_date_range_input("Trip dates",
 #'   msg_start = "set_depart", msg_end = "set_return",
-#'   start = "model.depart", end = "model.return")
+#'   start = "model.depart", end = "model.return"
+#' )
 #'
 #' @export
 mvu_date_range_input <- function(label, msg_start, msg_end,
@@ -594,15 +615,18 @@ mvu_date_range_input <- function(label, msg_start, msg_end,
   }
   tagList(
     tags$label(class = "form-label", label),
-    div(class = "d-flex gap-2",
-      div(class = "flex-fill",
+    div(
+      class = "d-flex gap-2",
+      div(
+        class = "flex-fill",
         tags$label(
           class = "form-label small text-muted", `for` = start_id,
           label_start
         ),
         do.call(tags$input, start_attrs)
       ),
-      div(class = "flex-fill",
+      div(
+        class = "flex-fill",
         tags$label(
           class = "form-label small text-muted", `for` = end_id,
           label_end
@@ -632,8 +656,10 @@ mvu_date_range_input <- function(label, msg_start, msg_end,
 #'
 #' @examples
 #' mvu_file_input("Upload CSV", msg = "upload", accept = ".csv")
-#' mvu_file_input("Photos", msg = "upload_photos",
-#'   accept = "image/*", multiple = TRUE)
+#' mvu_file_input("Photos",
+#'   msg = "upload_photos",
+#'   accept = "image/*", multiple = TRUE
+#' )
 #'
 #' @export
 mvu_file_input <- function(label, msg, accept = NULL, multiple = FALSE,

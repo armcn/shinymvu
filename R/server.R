@@ -48,7 +48,9 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
   msg_factory <- msg
 
   dispatch <- function(type, value) {
-    if (debug && isTRUE(isolate(is_traveling()))) return()
+    if (debug && isTRUE(isolate(is_traveling()))) {
+      return()
+    }
 
     if (!is.null(msg_factory)) {
       type <- msg_factory(type)
@@ -90,7 +92,9 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
 
     if (!is.null(on_msg)) {
       proceed <- on_msg(model, raw$type, raw$value, session)
-      if (isFALSE(proceed)) return()
+      if (isFALSE(proceed)) {
+        return()
+      }
     }
 
     dispatch(raw$type, raw$value)
@@ -102,9 +106,12 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       local({
         type <- msg_type
         rv <- subs[[type]]
-        observeEvent(rv(), {
-          dispatch(type, rv())
-        }, ignoreInit = TRUE)
+        observeEvent(rv(),
+          {
+            dispatch(type, rv())
+          },
+          ignoreInit = TRUE
+        )
       })
     }
   }
@@ -137,7 +144,9 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       log <- isolate(log_rv())
       n <- length(log$transitions)
       step <- max(0L, min(as.integer(step), n))
-      if (step == 0L) return(init())
+      if (step == 0L) {
+        return(init())
+      }
       log$transitions[[step]]$model_after
     }
 

@@ -129,8 +129,8 @@ summary.mvu_log <- function(object, ...) {
 #' @examples
 #' \dontrun{
 #' models <- mvu_replay(my_init, my_update, saved_log)
-#' models[[1]]  # initial state
-#' models[[length(models)]]  # final state
+#' models[[1]] # initial state
+#' models[[length(models)]] # final state
 #' }
 #'
 #' @export

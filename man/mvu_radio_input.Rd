@@ -31,6 +31,7 @@ message.
 \examples{
 mvu_radio_input("Pet",
   choices = c("Dog" = "dog", "Cat" = "cat", "Fish" = "fish"),
-  msg = "set_pet", selected = "model.pet")
+  msg = "set_pet", selected = "model.pet"
+)
 
 }

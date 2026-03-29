@@ -41,7 +41,8 @@ page do not collide on message channels.
 \examples{
 \dontrun{
 ui <- shiny::fluidPage(
-  mvu_module_ui("counter",
+  mvu_module_ui(
+    "counter",
     shiny::tags$h1("Counter Module")
   )
 )

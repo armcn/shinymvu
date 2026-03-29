@@ -20,7 +20,8 @@ Returns a named list with a \verb{@change} (or debounced \verb{@input}) attribut
 that dispatches the element's string value as an MVU message.
 }
 \examples{
-shiny::tags$select(!!!on_input("set_color"),
+shiny::tags$select(
+  !!!on_input("set_color"),
   shiny::tags$option(value = "red", "Red"),
   shiny::tags$option(value = "blue", "Blue")
 )

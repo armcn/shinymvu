@@ -145,7 +145,8 @@ test_that("mvu_textarea_input generates textarea", {
 test_that("mvu_select_input generates select with options", {
   sel <- mvu_select_input("Color",
     choices = c("Red" = "red", "Blue" = "blue"),
-    msg = "set_color", selected = "model.color")
+    msg = "set_color", selected = "model.color"
+  )
   html <- as.character(sel)
   expect_match(html, "<select")
   expect_match(html, 'value="red"')
@@ -178,7 +179,8 @@ test_that("mvu_checkbox_input generates checkbox", {
 test_that("mvu_checkbox_group_input generates multiple checkboxes", {
   cg <- mvu_checkbox_group_input("Toppings",
     choices = c("Cheese", "Peppers"),
-    msg = "toggle_top", selected = "model.toppings")
+    msg = "toggle_top", selected = "model.toppings"
+  )
   html <- as.character(cg)
   expect_match(html, "Cheese")
   expect_match(html, "Peppers")
@@ -191,7 +193,8 @@ test_that("mvu_checkbox_group_input generates multiple checkboxes", {
 test_that("mvu_radio_input generates radio buttons", {
   ri <- mvu_radio_input("Pet",
     choices = c("Dog" = "dog", "Cat" = "cat"),
-    msg = "set_pet", selected = "model.pet")
+    msg = "set_pet", selected = "model.pet"
+  )
   html <- as.character(ri)
   expect_match(html, 'type="radio"')
   expect_match(html, "Dog")
@@ -211,8 +214,10 @@ test_that("mvu_radio_input shares group name", {
 # -- mvu_slider_input ----------------------------------------------------------
 
 test_that("mvu_slider_input generates range input", {
-  sl <- mvu_slider_input("Vol", min = 0, max = 100, msg = "set_vol",
-    value = "model.vol")
+  sl <- mvu_slider_input("Vol",
+    min = 0, max = 100, msg = "set_vol",
+    value = "model.vol"
+  )
   html <- as.character(sl)
   expect_match(html, 'type="range"')
   expect_match(html, 'min="0"')
@@ -249,7 +254,8 @@ test_that("mvu_date_input with min/max constraints", {
 test_that("mvu_date_range_input generates two date inputs", {
   dr <- mvu_date_range_input("Trip",
     msg_start = "set_depart", msg_end = "set_return",
-    start = "model.depart", end = "model.return")
+    start = "model.depart", end = "model.return"
+  )
   html <- as.character(dr)
   expect_match(html, "set_depart")
   expect_match(html, "set_return")
@@ -267,8 +273,10 @@ test_that("mvu_file_input generates file input", {
 })
 
 test_that("mvu_file_input with accept and multiple", {
-  fi <- mvu_file_input("Photos", msg = "up", accept = c("image/*", ".png"),
-    multiple = TRUE)
+  fi <- mvu_file_input("Photos",
+    msg = "up", accept = c("image/*", ".png"),
+    multiple = TRUE
+  )
   html <- as.character(fi)
   expect_match(html, "image/\\*")
   expect_match(html, "multiple")

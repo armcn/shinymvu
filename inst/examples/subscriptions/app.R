@@ -7,9 +7,10 @@ library(shinymvu)
 filter_init <- function() list(dataset = "mtcars", n = 10)
 
 filter_update <- function(model, msg, value) {
-  switch(msg,
+  switch(
+    msg,
     set_dataset = list_set(model, dataset = value),
-    set_n       = list_set(model, n = value)
+    set_n = list_set(model, n = value)
   )
 }
 

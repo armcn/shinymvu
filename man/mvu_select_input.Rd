@@ -37,6 +37,7 @@ A \verb{<select>} dropdown that dispatches the selected value as an MVU message.
 \examples{
 mvu_select_input("Color",
   choices = c("Red" = "red", "Green" = "green", "Blue" = "blue"),
-  msg = "set_color", selected = "model.color")
+  msg = "set_color", selected = "model.color"
+)
 
 }

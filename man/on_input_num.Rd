@@ -19,7 +19,9 @@ Returns a named list with a \verb{@change} (or debounced \verb{@input}) attribut
 that dispatches the element's value coerced to a number.
 }
 \examples{
-shiny::tags$input(type = "range", min = "0", max = "100",
-  !!!on_input_num("set_volume"))
+shiny::tags$input(
+  type = "range", min = "0", max = "100",
+  !!!on_input_num("set_volume")
+)
 
 }

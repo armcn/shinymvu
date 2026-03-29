@@ -29,10 +29,11 @@ check_msg <- mvu_enum(c("increment", "decrement", "reset"))
 model <- list(count = 5)
 
 msg <- check_msg("increment")
-match_enum(msg,
+match_enum(
+  msg,
   "increment" ~ list_set(model, count = model$count + 1),
   "decrement" ~ list_set(model, count = model$count - 1),
-  "reset"     ~ list_set(model, count = 0)
+  "reset" ~ list_set(model, count = 0)
 )
 
 msg <- check_msg("reset")

@@ -45,6 +45,7 @@ dispatches a separate MVU message.
 \examples{
 mvu_date_range_input("Trip dates",
   msg_start = "set_depart", msg_end = "set_return",
-  start = "model.depart", end = "model.return")
+  start = "model.depart", end = "model.return"
+)
 
 }

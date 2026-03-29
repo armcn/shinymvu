@@ -40,6 +40,7 @@ in/out of a list.
 \examples{
 mvu_checkbox_group_input("Toppings",
   choices = c("Cheese", "Peppers", "Onions"),
-  msg = "toggle_topping", selected = "model.toppings")
+  msg = "toggle_topping", selected = "model.toppings"
+)
 
 }

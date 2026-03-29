@@ -25,7 +25,8 @@ test_that("mvu_enum rejects unknown values", {
 
 test_that("match_enum returns the correct case", {
   Msg <- mvu_enum(c("increment", "decrement"))
-  result <- match_enum(Msg("increment"),
+  result <- match_enum(
+    Msg("increment"),
     "increment" ~ "went up",
     "decrement" ~ "went down"
   )
@@ -35,7 +36,8 @@ test_that("match_enum returns the correct case", {
 test_that("match_enum evaluates expressions in caller environment", {
   Msg <- mvu_enum(c("increment", "decrement"))
   model <- list(count = 5)
-  result <- match_enum(Msg("increment"),
+  result <- match_enum(
+    Msg("increment"),
     "increment" ~ list_set(model, count = model$count + 1),
     "decrement" ~ list_set(model, count = model$count - 1)
   )
@@ -70,11 +72,13 @@ test_that("match_enum errors on unknown levels", {
 
 test_that("match_enum supports multiple values on LHS", {
   Msg <- mvu_enum(c("a", "b", "c"))
-  result_a <- match_enum(Msg("a"),
+  result_a <- match_enum(
+    Msg("a"),
     c("a", "b") ~ "first two",
     "c" ~ "third"
   )
-  result_b <- match_enum(Msg("b"),
+  result_b <- match_enum(
+    Msg("b"),
     c("a", "b") ~ "first two",
     "c" ~ "third"
   )

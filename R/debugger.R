@@ -284,27 +284,42 @@ debugger_js <- function() {
 }
 
 format_leaf_value <- function(x) {
-  if (is.null(x)) "null"
-  else if (is.logical(x) && length(x) == 1L) tolower(as.character(x))
-  else if (is.character(x) && length(x) == 1L) sprintf('"%s"', x)
-  else if (is.atomic(x) && length(x) == 1L) as.character(x)
-  else if (is.atomic(x) && length(x) > 1L) {
+  if (is.null(x)) {
+    "null"
+  } else if (is.logical(x) && length(x) == 1L) {
+    tolower(as.character(x))
+  } else if (is.character(x) && length(x) == 1L) {
+    sprintf('"%s"', x)
+  } else if (is.atomic(x) && length(x) == 1L) {
+    as.character(x)
+  } else if (is.atomic(x) && length(x) > 1L) {
     vals <- vapply(x, function(v) {
-      if (is.character(v)) sprintf('"%s"', v)
-      else if (is.logical(v)) tolower(as.character(v))
-      else as.character(v)
+      if (is.character(v)) {
+        sprintf('"%s"', v)
+      } else if (is.logical(v)) {
+        tolower(as.character(v))
+      } else {
+        as.character(v)
+      }
     }, character(1))
     sprintf("[%s]", paste(vals, collapse = ", "))
+  } else {
+    as.character(x)
   }
-  else as.character(x)
 }
 
 value_css_class <- function(x) {
-  if (is.null(x)) "mvu-dbg-null"
-  else if (is.logical(x)) "mvu-dbg-bool"
-  else if (is.numeric(x)) "mvu-dbg-num"
-  else if (is.character(x)) "mvu-dbg-str"
-  else ""
+  if (is.null(x)) {
+    "mvu-dbg-null"
+  } else if (is.logical(x)) {
+    "mvu-dbg-bool"
+  } else if (is.numeric(x)) {
+    "mvu-dbg-num"
+  } else if (is.character(x)) {
+    "mvu-dbg-str"
+  } else {
+    ""
+  }
 }
 
 model_tree_html <- function(obj, name = NULL) {
@@ -324,7 +339,8 @@ model_tree_html <- function(obj, name = NULL) {
       sprintf("[%d]", length(obj))
     }
 
-    tags$details(open = NA, class = "mvu-dbg-node",
+    tags$details(
+      open = NA, class = "mvu-dbg-node",
       tags$summary(
         tags$span(class = "mvu-dbg-key", label),
         tags$span(class = "mvu-dbg-count", count_str)
@@ -332,17 +348,23 @@ model_tree_html <- function(obj, name = NULL) {
       div(class = "mvu-dbg-children", children)
     )
   } else if (is.list(obj) && length(obj) == 0) {
-    div(class = "mvu-dbg-leaf",
+    div(
+      class = "mvu-dbg-leaf",
       if (!is.null(name)) tags$span(class = "mvu-dbg-key", paste0(name, ": ")),
-      tags$span(class = "mvu-dbg-null",
-        if (is.null(names(obj))) "[]" else "{}")
+      tags$span(
+        class = "mvu-dbg-null",
+        if (is.null(names(obj))) "[]" else "{}"
+      )
     )
   } else {
     val_class <- value_css_class(obj)
-    div(class = "mvu-dbg-leaf",
+    div(
+      class = "mvu-dbg-leaf",
       if (!is.null(name)) tags$span(class = "mvu-dbg-key", paste0(name, ": ")),
-      tags$span(class = paste("mvu-dbg-val", val_class),
-        format_leaf_value(obj))
+      tags$span(
+        class = paste("mvu-dbg-val", val_class),
+        format_leaf_value(obj)
+      )
     )
   }
 }
@@ -363,7 +385,8 @@ debugger_ui <- function(id) {
   tagList(
     tags$style(HTML(debugger_css())),
     tags$script(HTML(debugger_js())),
-    div(class = "mvu-dbg",
+    div(
+      class = "mvu-dbg",
       tags$button(
         id = ns("tab"),
         class = "mvu-dbg-tab",
@@ -375,7 +398,8 @@ debugger_ui <- function(id) {
         id = ns("panel"),
         class = "mvu-dbg-panel",
         style = "display: none;",
-        div(class = "mvu-dbg-header",
+        div(
+          class = "mvu-dbg-header",
           shiny::uiOutput(ns("nav"), inline = TRUE),
           shiny::uiOutput(ns("resume_btn"), inline = TRUE),
           tags$button(
@@ -401,10 +425,12 @@ debugger_ui <- function(id) {
             accept = ".json", style = "display:none;"
           )
         ),
-        div(class = "mvu-dbg-list",
+        div(
+          class = "mvu-dbg-list",
           shiny::uiOutput(ns("msg_list"))
         ),
-        div(class = "mvu-dbg-model-section",
+        div(
+          class = "mvu-dbg-model-section",
           shiny::uiOutput(ns("model_view"))
         )
       )
@@ -439,12 +465,15 @@ debugger_server <- function(id, runtime, init) {
       n <- length(log$transitions)
       step <- current_step()
       if (is.null(step)) step <- n
-      if (n == 0) return(NULL)
+      if (n == 0) {
+        return(NULL)
+      }
 
       back_disabled <- if (step <= 0) NA else NULL
       fwd_disabled <- if (step >= n) NA else NULL
 
-      div(class = "mvu-dbg-nav",
+      div(
+        class = "mvu-dbg-nav",
         tags$button(
           class = "mvu-dbg-nav-btn",
           disabled = back_disabled,
@@ -454,7 +483,8 @@ debugger_server <- function(id, runtime, init) {
           ),
           "\u25c0"
         ),
-        tags$span(class = "mvu-dbg-nav-label",
+        tags$span(
+          class = "mvu-dbg-nav-label",
           sprintf("%d/%d", step, n)
         ),
         tags$button(
@@ -519,8 +549,10 @@ debugger_server <- function(id, runtime, init) {
       if (is.null(step)) step <- n
 
       if (n == 0) {
-        return(div(class = "mvu-dbg-empty",
-          "Interact with the app to build a message history."))
+        return(div(
+          class = "mvu-dbg-empty",
+          "Interact with the app to build a message history."
+        ))
       }
 
       items <- lapply(rev(seq_len(n)), function(i) {
@@ -540,8 +572,10 @@ debugger_server <- function(id, runtime, init) {
             session$ns("jump"), i
           ),
           div(
-            tags$span(class = "mvu-dbg-type",
-              sprintf("%d. %s", i, t$type)),
+            tags$span(
+              class = "mvu-dbg-type",
+              sprintf("%d. %s", i, t$type)
+            ),
             value_tag
           )
         )
@@ -587,8 +621,10 @@ debugger_server <- function(id, runtime, init) {
 
       model_obj <- runtime$model_at(step)
 
-      div(class = "mvu-dbg-model-wrap",
-        div(class = "mvu-dbg-step-label",
+      div(
+        class = "mvu-dbg-model-wrap",
+        div(
+          class = "mvu-dbg-step-label",
           if (step == 0) "Model at init" else sprintf("Model at step %d", step)
         ),
         model_tree_html(model_obj)
@@ -599,8 +635,10 @@ debugger_server <- function(id, runtime, init) {
 
     output$export <- shiny::downloadHandler(
       filename = function() {
-        sprintf("shinymvu-session-%s.json",
-          format(Sys.time(), "%Y%m%d-%H%M%S"))
+        sprintf(
+          "shinymvu-session-%s.json",
+          format(Sys.time(), "%Y%m%d-%H%M%S")
+        )
       },
       content = function(file) {
         log <- isolate(runtime$log())
@@ -609,21 +647,26 @@ debugger_server <- function(id, runtime, init) {
         })
         jsonlite::write_json(
           list(app = "shinymvu", version = 1L, messages = messages),
-          file, auto_unbox = TRUE, pretty = TRUE
+          file,
+          auto_unbox = TRUE, pretty = TRUE
         )
       }
     )
 
     observeEvent(input$import_data, {
-      tryCatch({
-        data <- jsonlite::fromJSON(input$import_data,
-          simplifyVector = FALSE)
-        if (!is.null(data$messages)) {
-          runtime$import_log(data$messages)
+      tryCatch(
+        {
+          data <- jsonlite::fromJSON(input$import_data,
+            simplifyVector = FALSE
+          )
+          if (!is.null(data$messages)) {
+            runtime$import_log(data$messages)
+          }
+        },
+        error = function(e) {
+          warning("shinymvu debugger: failed to import session: ", e$message)
         }
-      }, error = function(e) {
-        warning("shinymvu debugger: failed to import session: ", e$message)
-      })
+      )
     })
 
     shiny::outputOptions(output, "msg_list", suspendWhenHidden = FALSE)

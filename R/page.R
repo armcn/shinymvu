@@ -62,7 +62,8 @@ mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
     }, character(1)), collapse = "\n")
   }
 
-  js <- sprintf('
+  js <- sprintf(
+    '
     document.addEventListener("alpine:init", function() {
       Alpine.data("%s", function() {
         return {
@@ -88,6 +89,7 @@ mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
       });
     });
   ', js_name, model_channel, extra_handlers, msg_id,
-  if (!is.null(extra_js)) paste0(",\n", extra_js) else "")
+    if (!is.null(extra_js)) paste0(",\n", extra_js) else ""
+  )
   tags$script(HTML(js))
 }

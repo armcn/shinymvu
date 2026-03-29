@@ -38,7 +38,9 @@ A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and range inp
 A range \verb{<input>} that dispatches its numeric value as an MVU message.
 }
 \examples{
-mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume",
-  value = "model.volume")
+mvu_slider_input("Volume",
+  min = 0, max = 100, msg = "set_volume",
+  value = "model.volume"
+)
 
 }

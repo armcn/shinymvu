@@ -212,7 +212,8 @@ run_effects <- function(effs, session, dispatch = NULL) {
     if (!inherits(eff, "mvu_effect")) next
     switch(eff$kind,
       "notify" = shiny::showNotification(
-        eff$text, type = eff$type, duration = eff$duration
+        eff$text,
+        type = eff$type, duration = eff$duration
       ),
       "send" = session$sendCustomMessage(eff$channel, eff$data),
       "cmd" = run_cmd_effect(eff, dispatch),
@@ -228,7 +229,7 @@ run_cmd_effect <- function(eff, dispatch) {
     return(invisible())
   }
   if (!requireNamespace("promises", quietly = TRUE) ||
-      !requireNamespace("future", quietly = TRUE)) {
+    !requireNamespace("future", quietly = TRUE)) {
     stop(
       "effect_cmd() requires the 'promises' and 'future' packages.\n",
       "Install them with: install.packages(c('promises', 'future'))",
