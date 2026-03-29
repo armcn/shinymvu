@@ -12,6 +12,7 @@ mvu_server(
   component = "mvu",
   on_msg = NULL,
   debug = FALSE,
+  subscriptions = NULL,
   input,
   output,
   session,

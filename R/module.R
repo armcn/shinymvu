@@ -70,6 +70,11 @@ mvu_module_ui <- function(id, ..., component = "mvu",
 #'   return value changes to a list with `$model` (reactiveVal), `$log`
 #'   (reactiveVal of [mvu_log()]), `$travel_to` (function), `$resume`
 #'   (function), and `$is_traveling` (reactiveVal).
+#' @param subscriptions A function returning a named list of reactive
+#'   expressions. Names are message types; when a reactive changes, the
+#'   runtime dispatches the corresponding message through `update`. This
+#'   is the Elm-style subscriptions pattern for connecting external event
+#'   sources (other modules, timers, Shiny inputs) into the MVU loop.
 #'
 #' @return When `debug = FALSE` (default): the model `reactiveVal`.
 #'   When `debug = TRUE`: a list with `$model`, `$log`, `$travel_to`,
@@ -89,14 +94,14 @@ mvu_module_ui <- function(id, ..., component = "mvu",
 mvu_module_server <- function(id, init, update, msg = NULL,
                               to_frontend = identity,
                               component = "mvu", on_msg = NULL,
-                              debug = FALSE) {
+                              debug = FALSE, subscriptions = NULL) {
   moduleServer(id, function(input, output, session) {
     comp_id <- session$ns(component)
     mvu_server(
       init = init, update = update, msg = msg,
       to_frontend = to_frontend,
       component = component, on_msg = on_msg,
-      debug = debug,
+      debug = debug, subscriptions = subscriptions,
       input = input, output = output, session = session,
       .channel_component = comp_id
     )

@@ -132,6 +132,42 @@ effect_custom <- function(fn) {
   structure(list(kind = "custom", fn = fn), class = "mvu_effect")
 }
 
+#' Create an Async Command Effect
+#'
+#' Describes an asynchronous operation that runs in a background process
+#' and dispatches a message with the result when complete. This is the
+#' Elm-style `Cmd` pattern: the app stays interactive while the work
+#' runs, and the result feeds back through `update` as a new message.
+#'
+#' Requires the \pkg{future} package to be installed and a
+#' [future::plan()] to be set (e.g. `future::plan(future::multisession)`).
+#'
+#' @param fn A function with no arguments that performs the work. Runs
+#'   in a background R process.
+#' @param msg The message type (string) to dispatch when `fn` completes
+#'   successfully. The return value of `fn` becomes the message `value`.
+#' @param error_msg Optional message type to dispatch on failure. The
+#'   error message string becomes the `value`. If `NULL` (default),
+#'   errors are silently ignored.
+#'
+#' @return An `mvu_effect` object.
+#'
+#' @examples
+#' effect_cmd(
+#'   fn = function() head(mtcars, 5),
+#'   msg = "data_loaded",
+#'   error_msg = "load_failed"
+#' )
+#'
+#' @export
+effect_cmd <- function(fn, msg, error_msg = NULL) {
+  if (!is.function(fn)) stop("effect_cmd() requires a function")
+  structure(
+    list(kind = "cmd", fn = fn, msg = msg, error_msg = error_msg),
+    class = "mvu_effect"
+  )
+}
+
 #' Combine Multiple Effects
 #'
 #' Groups several effects into a single object that [mvu_result()] will
@@ -165,12 +201,13 @@ format_effect <- function(eff) {
   switch(eff$kind,
     "notify" = sprintf("notify(%s, type=%s)", eff$text, eff$type),
     "send"   = sprintf("send(%s)", eff$channel),
+    "cmd"    = sprintf("cmd(msg=%s)", eff$msg),
     "custom" = "custom(fn)",
     sprintf("unknown(%s)", eff$kind)
   )
 }
 
-run_effects <- function(effs, session) {
+run_effects <- function(effs, session, dispatch = NULL) {
   for (eff in effs) {
     if (!inherits(eff, "mvu_effect")) next
     switch(eff$kind,
@@ -178,8 +215,36 @@ run_effects <- function(effs, session) {
         eff$text, type = eff$type, duration = eff$duration
       ),
       "send" = session$sendCustomMessage(eff$channel, eff$data),
+      "cmd" = run_cmd_effect(eff, dispatch),
       "custom" = eff$fn(session),
       warning(sprintf("Unknown effect kind: '%s'", eff$kind), call. = FALSE)
     )
   }
+}
+
+run_cmd_effect <- function(eff, dispatch) {
+  if (is.null(dispatch)) {
+    warning("effect_cmd() requires the MVU runtime; ignored", call. = FALSE)
+    return(invisible())
+  }
+  if (!requireNamespace("promises", quietly = TRUE) ||
+      !requireNamespace("future", quietly = TRUE)) {
+    stop(
+      "effect_cmd() requires the 'promises' and 'future' packages.\n",
+      "Install them with: install.packages(c('promises', 'future'))",
+      call. = FALSE
+    )
+  }
+  p <- promises::future_promise(eff$fn())
+  promises::then(p,
+    onFulfilled = function(result) {
+      dispatch(eff$msg, result)
+    },
+    onRejected = if (!is.null(eff$error_msg)) {
+      function(err) {
+        dispatch(eff$error_msg, conditionMessage(err))
+      }
+    }
+  )
+  invisible()
 }

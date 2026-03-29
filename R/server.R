@@ -20,6 +20,7 @@
 #' @keywords internal
 mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
                        component = "mvu", on_msg = NULL, debug = FALSE,
+                       subscriptions = NULL,
                        input, output, session,
                        .channel_component = component) {
   model_channel <- paste0(.channel_component, "__model")
@@ -46,29 +47,21 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
 
   msg_factory <- msg
 
-  observeEvent(input[[msg_input]], {
+  dispatch <- function(type, value) {
     if (debug && isTRUE(isolate(is_traveling()))) return()
-
-    raw <- input[[msg_input]]
-    type <- raw$type
-    value <- raw$value
 
     if (!is.null(msg_factory)) {
       type <- msg_factory(type)
     }
 
-    if (!is.null(on_msg)) {
-      proceed <- on_msg(model, type, value, session)
-      if (isFALSE(proceed)) return()
-    }
+    model_before <- if (debug) isolate(model()) else NULL
+    current_model <- isolate(model())
 
-    model_before <- if (debug) model() else NULL
-
-    result <- update(model(), type, value)
+    result <- update(current_model, type, value)
 
     if (is_mvu_result(result)) {
       model(result$model)
-      run_effects(result$effects, session)
+      run_effects(result$effects, session, dispatch = dispatch)
       result_effects <- result$effects
     } else {
       model(result)
@@ -82,7 +75,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
         type = type,
         value = value,
         model_before = model_before,
-        model_after = model(),
+        model_after = isolate(model()),
         effects = result_effects
       )
       current_log <- isolate(log_rv())
@@ -90,7 +83,31 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       log_rv(mvu_log(current_log$transitions))
       cached_models <<- NULL
     }
+  }
+
+  observeEvent(input[[msg_input]], {
+    raw <- input[[msg_input]]
+
+    if (!is.null(on_msg)) {
+      proceed <- on_msg(model, raw$type, raw$value, session)
+      if (isFALSE(proceed)) return()
+    }
+
+    dispatch(raw$type, raw$value)
   })
+
+  if (!is.null(subscriptions)) {
+    subs <- subscriptions()
+    for (msg_type in names(subs)) {
+      local({
+        type <- msg_type
+        rv <- subs[[type]]
+        observeEvent(rv(), {
+          dispatch(type, rv())
+        }, ignoreInit = TRUE)
+      })
+    }
+  }
 
   if (debug) {
     travel_to_fn <- function(step) {

@@ -12,7 +12,8 @@ mvu_module_server(
   to_frontend = identity,
   component = "mvu",
   on_msg = NULL,
-  debug = FALSE
+  debug = FALSE,
+  subscriptions = NULL
 )
 }
 \arguments{
@@ -44,6 +45,12 @@ built-in time-travel debugger overlay is injected into the page. The
 return value changes to a list with \verb{$model} (reactiveVal), \verb{$log}
 (reactiveVal of \code{\link[=mvu_log]{mvu_log()}}), \verb{$travel_to} (function), \verb{$resume}
 (function), and \verb{$is_traveling} (reactiveVal).}
+
+\item{subscriptions}{A function returning a named list of reactive
+expressions. Names are message types; when a reactive changes, the
+runtime dispatches the corresponding message through \code{update}. This
+is the Elm-style subscriptions pattern for connecting external event
+sources (other modules, timers, Shiny inputs) into the MVU loop.}
 }
 \value{
 When \code{debug = FALSE} (default): the model \code{reactiveVal}.
