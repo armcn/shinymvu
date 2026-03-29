@@ -1,4 +1,4 @@
-#' @keywords internal
+#' @description Model-View-Update architecture for Shiny applications.
 "_PACKAGE"
 
 #' @importFrom shiny tags div NS moduleServer reactiveVal observe observeEvent

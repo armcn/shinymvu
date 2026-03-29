@@ -64,8 +64,8 @@ mvu_module_ui <- function(id, ..., component = "mvu",
 #'   which sends the model as-is.
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument in [mvu_module_ui()].
-#' @param on_msg `r lifecycle::badge("deprecated")` Optional message hook.
-#'   Use [mvu_result()] with effect constructors instead.
+#' @param on_msg \[Deprecated\] Optional message hook. Use [mvu_result()]
+#'   with effect constructors instead.
 #' @param debug Logical. When `TRUE`, every transition is recorded and the
 #'   built-in time-travel debugger overlay is injected into the page. The
 #'   return value changes to a list with `$model` (reactiveVal), `$log`
