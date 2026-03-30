@@ -1,0 +1,528 @@
+---
+title: "View Reference"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{View Reference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+shinymvu uses [Alpine.js](https://alpinejs.dev/) for client-side reactivity.
+You build your UI with standard `shiny::tags$` elements and pipe them through
+`bind_*` and `on_*` helpers that add the necessary Alpine.js directives under
+the hood.
+
+This vignette is a reference for every binding and event helper. Each section
+shows the shinymvu helper alongside the raw Alpine.js it produces, so you can
+learn both at once.
+
+All expressions reference `model`, the JavaScript object that holds your
+current model state. The `send()` function dispatches messages to your R
+`update` function.
+
+# Displaying Text
+
+`bind_text()` sets the text content of an element from a model field.
+
+```{r}
+tags$span() |>
+  bind_text("model.count")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$span(`x-text` = "model.count")
+```
+
+Any element works:
+
+```{r}
+tags$h1() |>
+  bind_text("model.title")
+
+tags$p() |>
+  bind_text("model.message")
+```
+
+If you need computed text like `"5 items"`, do the formatting in
+`to_frontend` rather than writing JavaScript expressions:
+
+```{r}
+# In to_frontend:
+to_frontend <- function(model) {
+  list(
+    count_label = paste0(
+      length(model$items), " items"
+    )
+  )
+}
+
+# In the view:
+tags$span() |>
+  bind_text("model.count_label")
+```
+
+# Buttons
+
+`on_click()` dispatches a message when the element is clicked.
+
+```{r}
+tags$button("+") |>
+  on_click("increment")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$button(
+  "+",
+  `@click` = "send('increment')"
+)
+```
+
+To send a static value with the message:
+
+```{r}
+tags$button("Page 2") |>
+  on_click("set_page", 2)
+```
+
+# Text Input
+
+`bind_value()` keeps an input in sync with the model. `on_input()` sends the
+typed value as a message.
+
+```{r}
+tags$input(type = "text") |>
+  bind_value("model.name") |>
+  on_input("set_name")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$input(
+  type = "text",
+  `x-bind:value` = "model.name",
+  `@change` = "send('set_name',
+    $event.target.value)"
+)
+```
+
+Use `debounce` to send on every keystroke (debounced) instead of on blur:
+
+```{r}
+tags$input(
+  type = "text",
+  placeholder = "Search..."
+) |>
+  bind_value("model.search") |>
+  on_input("set_search", debounce = 300)
+```
+
+# Checkbox
+
+`bind_checked()` syncs the checked state. `on_check()` sends the boolean
+value.
+
+```{r}
+tags$input(type = "checkbox") |>
+  bind_checked("model.agree") |>
+  on_check("toggle_agree")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$input(
+  type = "checkbox",
+  `x-bind:checked` = "model.agree",
+  `@change` = "send('toggle_agree',
+    $event.target.checked)"
+)
+```
+
+# Select Dropdown
+
+```{r}
+tags$select(
+  tags$option(value = "red", "Red"),
+  tags$option(value = "green", "Green"),
+  tags$option(value = "blue", "Blue")
+) |>
+  bind_value("model.color") |>
+  on_input("set_color")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$select(
+  `x-bind:value` = "model.color",
+  `@change` = "send('set_color',
+    $event.target.value)",
+  tags$option(value = "red", "Red"),
+  tags$option(value = "green", "Green"),
+  tags$option(value = "blue", "Blue")
+)
+```
+
+# Number Input
+
+`on_input_num()` coerces the value to a number before sending.
+
+```{r}
+tags$input(
+  type = "number", min = "0", max = "120"
+) |>
+  bind_value("model.age") |>
+  on_input_num("set_age")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$input(
+  type = "number",
+  `x-bind:value` = "model.age",
+  `@change` = "send('set_age',
+    Number($event.target.value))",
+  min = "0",
+  max = "120"
+)
+```
+
+# Range / Slider
+
+Same pattern as number input:
+
+```{r}
+tags$input(
+  type = "range",
+  min = "0", max = "100", step = "1"
+) |>
+  bind_value("model.volume") |>
+  on_input_num("set_volume")
+```
+
+# Textarea
+
+```{r}
+tags$textarea(
+  rows = "4",
+  placeholder = "Tell us about yourself..."
+) |>
+  bind_value("model.bio") |>
+  on_input("set_bio", debounce = 300)
+```
+
+# Password Input
+
+```{r}
+tags$input(type = "password") |>
+  bind_value("model.password") |>
+  on_input("set_password", debounce = 300)
+```
+
+# Date Input
+
+```{r}
+tags$input(type = "date") |>
+  bind_value("model.birthday") |>
+  on_input("set_birthday")
+```
+
+# Color Input
+
+```{r}
+tags$input(type = "color") |>
+  bind_value("model.color") |>
+  on_input("set_color")
+```
+
+# Radio Buttons
+
+Each radio input sends the same message. `bind_checked()` takes a JavaScript
+expression that compares the model value to the radio's value.
+
+```{r}
+tags$div(
+  tags$input(
+    type = "radio", name = "pet", value = "dog"
+  ) |>
+    bind_checked("model.pet === 'dog'") |>
+    on_input("set_pet"),
+  tags$label("Dog")
+)
+
+tags$div(
+  tags$input(
+    type = "radio", name = "pet", value = "cat"
+  ) |>
+    bind_checked("model.pet === 'cat'") |>
+    on_input("set_pet"),
+  tags$label("Cat")
+)
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$div(
+  tags$input(
+    type = "radio",
+    name = "pet",
+    value = "dog",
+    `x-bind:checked` = "model.pet === 'dog'",
+    `@change` = "send('set_pet',
+      $event.target.value)"
+  ),
+  tags$label("Dog")
+)
+```
+
+# Checkbox Group
+
+For multi-select checkboxes, each dispatches the same message type with a
+static value. Your `update` function toggles the value in/out of a list.
+
+```{r}
+tags$div(
+  tags$input(
+    type = "checkbox", value = "cheese"
+  ) |>
+    bind_checked(
+      "model.toppings.includes('cheese')"
+    ) |>
+    on_change("toggle_topping", "cheese"),
+  tags$label("Cheese")
+)
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$div(
+  tags$input(
+    type = "checkbox",
+    value = "cheese",
+    `x-bind:checked` =
+      "model.toppings.includes('cheese')",
+    `@change` = "send('toggle_topping', 'cheese')"
+  ),
+  tags$label("Cheese")
+)
+```
+
+# File Input
+
+`on_file()` extracts file metadata (name, size, type) and sends it as the
+message value.
+
+```{r}
+tags$input(type = "file") |>
+  on_file("upload")
+
+tags$input(
+  type = "file", multiple = NA, accept = "image/*"
+) |>
+  on_file("upload_photos")
+```
+
+# Key Events
+
+`on_key()` dispatches a message when a specific key is pressed.
+
+```{r}
+tags$input(type = "text") |>
+  bind_value("model.search") |>
+  on_input("set_search", debounce = 300) |>
+  on_key("enter", "submit_search") |>
+  on_key("escape", "clear_search")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$input(
+  type = "text",
+  `x-bind:value` = "model.search",
+  `@input.debounce.300ms` = "send('set_search',
+    $event.target.value)",
+  `@keydown.enter` = "send('submit_search')",
+  `@keydown.escape` = "send('clear_search')"
+)
+```
+
+# Conditional Show / Hide
+
+`bind_show()` toggles an element's visibility with CSS `display`. The element
+stays in the DOM.
+
+```{r}
+tags$div("Loading...") |>
+  bind_show("model.loading")
+
+tags$p(class = "text-danger") |>
+  bind_show("model.error") |>
+  bind_text("model.error")
+```
+
+You can combine `bind_show()` with other helpers:
+
+```{r}
+tags$button("Clear") |>
+  bind_show("model.search.length > 0") |>
+  on_click("clear")
+```
+
+# Conditional Render / Remove
+
+`bind_if()` completely adds or removes an element from the DOM. Use it on a
+`tags$template` wrapper.
+
+```{r}
+tags$template(
+  tags$div("Welcome back!")
+) |>
+  bind_if("model.loggedIn")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$template(
+  `x-if` = "model.loggedIn",
+  tags$div("Welcome back!")
+)
+```
+
+Use `bind_show()` for frequent toggles (cheaper, just CSS). Use `bind_if()`
+when the element should not exist at all when the condition is false.
+
+# List Rendering
+
+`bind_for()` iterates over a list and renders each item. The first argument
+is the loop variable name, the second is the model expression.
+
+```{r}
+tags$template(
+  tags$li() |> bind_text("item")
+) |>
+  bind_for("item", "model.items")
+```
+
+Raw Alpine.js equivalent:
+
+```{r}
+tags$template(
+  `x-for` = "item in model.items",
+  tags$li(`x-text` = "item")
+)
+```
+
+Use `bind_key()` for efficient DOM updates on keyed lists:
+
+```{r}
+tags$template(
+  tags$li(
+    tags$span() |> bind_text("item.text"),
+    tags$button("X") |>
+      on_click("delete", "item.id")
+  ) |>
+    bind_key("item.id")
+) |>
+  bind_for("item", "model.todos")
+```
+
+# Dynamic Attributes
+
+`bind_disabled()` is a shorthand for the common disabled pattern:
+
+```{r}
+tags$button("Submit") |>
+  bind_disabled("model.loading")
+```
+
+For any other attribute, use `bind_attr()`:
+
+```{r}
+tags$a() |>
+  bind_attr("href", "model.url") |>
+  bind_text("model.linkText")
+
+tags$img() |>
+  bind_attr("src", "model.avatarUrl") |>
+  bind_attr("alt", "model.name")
+```
+
+# Dynamic CSS Class
+
+`bind_class()` accepts a JavaScript expression. Use a ternary for
+toggling a single class, or an object for multiple classes:
+
+```{r}
+tags$div() |>
+  bind_class("model.isActive ? 'active' : ''")
+
+tags$li() |>
+  bind_class("{
+    'completed': item.done,
+    'editing': item.editing
+  }")
+```
+
+# Dynamic Style
+
+`bind_style()` accepts a JavaScript expression:
+
+```{r}
+tags$div(class = "progress-bar") |>
+  bind_style(
+    "'width: ' + model.progress + '%'"
+  )
+
+tags$div() |>
+  bind_style("{
+    opacity: model.visible ? 1 : 0.3
+  }")
+```
+
+# Summary
+
+**Event helpers** dispatch messages to your `update` function:
+
+| Helper | Sends | Use with |
+|---|---|---|
+| `on_click(msg)` | No payload (or static value) | Buttons, any clickable |
+| `on_input(msg)` | `$event.target.value` (string) | Text, select, date, color |
+| `on_input_num(msg)` | `Number($event.target.value)` | Number, range |
+| `on_check(msg)` | `$event.target.checked` (boolean) | Single checkbox |
+| `on_change(msg, value)` | Static value | Checkbox group |
+| `on_key(key, msg)` | No payload | Keyboard shortcuts |
+| `on_file(msg)` | File metadata list | File input |
+
+**Binding helpers** keep the DOM in sync with the model:
+
+| Helper | Alpine.js directive |
+|---|---|
+| `bind_text(expr)` | `x-text` |
+| `bind_value(expr)` | `x-bind:value` |
+| `bind_checked(expr)` | `x-bind:checked` |
+| `bind_show(expr)` | `x-show` |
+| `bind_if(expr)` | `x-if` |
+| `bind_for(var, expr)` | `x-for` |
+| `bind_key(expr)` | `x-bind:key` |
+| `bind_class(expr)` | `x-bind:class` |
+| `bind_style(expr)` | `x-bind:style` |
+| `bind_disabled(expr)` | `x-bind:disabled` |
+| `bind_attr(name, expr)` | `x-bind:{name}` |

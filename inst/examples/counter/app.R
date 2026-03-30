@@ -15,15 +15,20 @@ ui <- fluidPage(
   mvu_module_ui(
     id = "counter",
     div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
+      tags$button("-") |> on_click("decrement"),
+      tags$span() |> bind_text("model.count"),
+      tags$button("+") |> on_click("increment")
     )
   )
 )
 
 server <- function(input, output, session) {
-  mvu_module_server(id = "counter", init = init, update = update, debug = TRUE)
+  mvu_module_server(
+    id = "counter",
+    init = init,
+    update = update,
+    debug = TRUE
+  )
 }
 
 shinyApp(ui, server)
