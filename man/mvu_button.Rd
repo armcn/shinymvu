@@ -4,12 +4,13 @@
 \alias{mvu_button}
 \title{Action Button}
 \usage{
-mvu_button(label, class = "btn btn-primary", width = NULL, ...)
+mvu_button(label, class = "btn btn-default", width = NULL, ...)
 }
 \arguments{
 \item{label}{The button label.}
 
-\item{class}{CSS classes. Defaults to Bootstrap 5 primary button.}
+\item{class}{CSS classes. Defaults to \code{"btn btn-default"} to match
+\code{\link[shiny:actionButton]{shiny::actionButton()}}.}
 
 \item{width}{The width of the button (e.g. \code{"100\\\%"}).}
 

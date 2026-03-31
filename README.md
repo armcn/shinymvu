@@ -41,9 +41,9 @@ update <- function(model, msg, value) {
 ui <- fluidPage(
   mvu_module_ui("counter",
     div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
+      mvu_button("-") |> on_click("decrement"),
+      tags$span() |> bind_text("model.count"),
+      mvu_button("+") |> on_click("increment")
     )
   )
 )
@@ -65,13 +65,9 @@ rest of your app can read it like any other reactive source:
 ```r
 mod_slider_ui <- function(id) {
   mvu_module_ui(id,
-    mvu_slider_input(
-      "Rows to show", 
-      min = 1, 
-      max = 32,
-      msg = "set_n", 
-      value = "model.n"
-    )
+    mvu_slider_input("Rows to show", min = 1, max = 32) |>
+      bind_value("model.n") |>
+      on_input_num("set_n")
   )
 }
 
@@ -137,14 +133,14 @@ to get a built-in debugger overlay that records every state transition,
 lets you step back and forward through history, inspect the model, and
 import/export sessions.
 
-**Inputs.** Wrappers for standard Shiny inputs that dispatch MVU
-messages instead of using `inputId`:
+**Inputs.** Structural helpers matching Shiny's native inputs, wired
+to the MVU loop with pipe helpers:
 
 ```r
-mvu_button("Submit", msg = "submit")
-mvu_text_input("Name", msg = "set_name", value = "model.name")
-mvu_select_input("Color", choices = c("Red", "Blue"), msg = "set_color")
-mvu_slider_input("Volume", min = 0, max = 100, msg = "set_volume")
+mvu_button("Submit") |> on_click("submit")
+mvu_text_input("Name") |> bind_value("model.name") |> on_input("set_name")
+mvu_select_input("Color", choices = c("Red", "Blue")) |>
+  bind_value("model.color") |> on_input("set_color")
 ```
 
 ## Examples

@@ -18,7 +18,8 @@
 #' Creates a Bootstrap button. Add click handling with [on_click()].
 #'
 #' @param label The button label.
-#' @param class CSS classes. Defaults to Bootstrap 5 primary button.
+#' @param class CSS classes. Defaults to `"btn btn-default"` to match
+#'   [shiny::actionButton()].
 #' @param width The width of the button (e.g. `"100\%"`).
 #' @param ... Additional HTML attributes.
 #'
@@ -29,11 +30,12 @@
 #' mvu_button("Delete", class = "btn btn-danger")
 #'
 #' @export
-mvu_button <- function(label, class = "btn btn-primary",
+mvu_button <- function(label, class = "btn btn-default",
                        width = NULL, ...) {
   tags$button(
-    class = class,
     style = width_style(width),
+    type = "button",
+    class = class,
     ...,
     label
   )
@@ -71,10 +73,10 @@ mvu_text_input <- function(label, placeholder = NULL,
                            width = NULL, ...) {
   input_id <- random_id()
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     tags$input(
       id = input_id,
@@ -120,10 +122,10 @@ mvu_numeric_input <- function(label, min = NA, max = NA,
   if (!is.na(max)) input_tag$attribs$max <- max
   if (!is.na(step)) input_tag$attribs$step <- step
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     input_tag
   )
@@ -151,10 +153,10 @@ mvu_password_input <- function(label, placeholder = NULL,
                                width = NULL, ...) {
   input_id <- random_id()
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     tags$input(
       id = input_id,
@@ -189,10 +191,10 @@ mvu_textarea_input <- function(label, rows = 3, placeholder = NULL,
                                width = NULL, ...) {
   input_id <- random_id()
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     tags$textarea(
       id = input_id,
@@ -238,7 +240,7 @@ mvu_select_input <- function(label, choices, multiple = FALSE,
     c(
       list(
         id = input_id,
-        class = "form-select",
+        class = "form-control",
         ...
       ),
       make_options(choices)
@@ -247,12 +249,12 @@ mvu_select_input <- function(label, choices, multiple = FALSE,
   if (multiple) select_tag$attribs$multiple <- "multiple"
   if (!is.null(size)) select_tag$attribs$size <- size
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
-    select_tag
+    div(select_tag)
   )
 }
 
@@ -275,20 +277,15 @@ mvu_select_input <- function(label, choices, multiple = FALSE,
 #'
 #' @export
 mvu_checkbox_input <- function(label, width = NULL, ...) {
-  input_id <- random_id()
   div(
-    class = "form-check mb-3",
+    class = "form-group",
     style = width_style(width),
-    tags$input(
-      id = input_id,
-      type = "checkbox",
-      class = "form-check-input",
-      ...
-    ),
-    tags$label(
-      class = "form-check-label ms-1",
-      `for` = input_id,
-      label
+    div(
+      class = "checkbox",
+      tags$label(
+        tags$input(type = "checkbox", ...),
+        tags$span(label)
+      )
     )
   )
 }
@@ -332,17 +329,9 @@ mvu_checkbox_group_input <- function(label, choices, msg,
                                      width = NULL, ...) {
   nms <- if (!is.null(names(choices))) names(choices) else unname(choices)
   vals <- unname(choices)
-  check_class <- if (inline) {
-    "form-check form-check-inline"
-  } else {
-    "form-check"
-  }
   boxes <- mapply(function(lbl, val) {
-    input_id <- random_id()
     input_tag <- tags$input(
-      id = input_id,
       type = "checkbox",
-      class = "form-check-input",
       value = val,
       `@change` = send_js(msg, sprintf("'%s'", val)),
       ...
@@ -352,17 +341,24 @@ mvu_checkbox_group_input <- function(label, choices, msg,
         "%s.includes('%s')", selected, val
       )
     }
-    div(
-      class = check_class,
-      input_tag,
-      tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
-    )
+    if (inline) {
+      tags$label(
+        class = "checkbox-inline",
+        input_tag,
+        tags$span(lbl)
+      )
+    } else {
+      div(
+        class = "checkbox",
+        tags$label(input_tag, tags$span(lbl))
+      )
+    }
   }, nms, vals, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
-    if (!is.null(label)) tags$label(class = "form-label", label),
-    tagList(boxes)
+    if (!is.null(label)) tags$label(class = "control-label", label),
+    div(tagList(boxes))
   )
 }
 
@@ -400,17 +396,9 @@ mvu_radio_input <- function(label, choices, msg,
   nms <- if (!is.null(names(choices))) names(choices) else unname(choices)
   vals <- unname(choices)
   group_name <- random_id("radio")
-  radio_class <- if (inline) {
-    "form-check form-check-inline"
-  } else {
-    "form-check"
-  }
   radios <- mapply(function(lbl, val) {
-    input_id <- random_id()
     input_tag <- tags$input(
-      id = input_id,
       type = "radio",
-      class = "form-check-input",
       name = group_name,
       value = val,
       `@change` = send_js(msg, "$event.target.value"),
@@ -421,17 +409,24 @@ mvu_radio_input <- function(label, choices, msg,
         "%s === '%s'", selected, val
       )
     }
-    div(
-      class = radio_class,
-      input_tag,
-      tags$label(class = "form-check-label ms-1", `for` = input_id, lbl)
-    )
+    if (inline) {
+      tags$label(
+        class = "radio-inline",
+        input_tag,
+        tags$span(lbl)
+      )
+    } else {
+      div(
+        class = "radio",
+        tags$label(input_tag, tags$span(lbl))
+      )
+    }
   }, nms, vals, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
-    if (!is.null(label)) tags$label(class = "form-label", label),
-    tagList(radios)
+    if (!is.null(label)) tags$label(class = "control-label", label),
+    div(tagList(radios))
   )
 }
 
@@ -460,10 +455,10 @@ mvu_slider_input <- function(label, min, max, step = 1,
                              width = NULL, ...) {
   input_id <- random_id()
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     tags$input(
       id = input_id,
@@ -511,10 +506,10 @@ mvu_date_input <- function(label, min = NULL, max = NULL,
   if (!is.null(min)) input_tag$attribs$min <- as.character(min)
   if (!is.null(max)) input_tag$attribs$max <- as.character(max)
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     input_tag
   )
@@ -568,15 +563,15 @@ mvu_date_range_input <- function(label, min = NULL, max = NULL,
     end_tag$attribs$max <- as.character(max)
   }
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
-    if (!is.null(label)) tags$label(class = "form-label", label),
+    if (!is.null(label)) tags$label(class = "control-label", label),
     div(
       class = "d-flex gap-2",
       div(
         class = "flex-fill",
         tags$label(
-          class = "form-label small text-body-secondary",
+          class = "control-label small text-body-secondary",
           `for` = start_id,
           start_label
         ),
@@ -585,7 +580,7 @@ mvu_date_range_input <- function(label, min = NULL, max = NULL,
       div(
         class = "flex-fill",
         tags$label(
-          class = "form-label small text-body-secondary",
+          class = "control-label small text-body-secondary",
           `for` = end_id,
           end_label
         ),
@@ -636,10 +631,10 @@ mvu_file_input <- function(label, accept = NULL, multiple = FALSE,
   }
   if (multiple) input_tag$attribs$multiple <- NA
   div(
-    class = "mb-3",
+    class = "form-group",
     style = width_style(width),
     if (!is.null(label)) {
-      tags$label(class = "form-label", `for` = input_id, label)
+      tags$label(class = "control-label", `for` = input_id, label)
     },
     input_tag
   )
@@ -675,5 +670,5 @@ make_options <- function(choices) {
 
 width_style <- function(width) {
   if (is.null(width)) return(NULL)
-  paste0("width: ", width, ";")
+  htmltools::css(width = htmltools::validateCssUnit(width))
 }

@@ -15,9 +15,9 @@ ui <- fluidPage(
   mvu_module_ui(
     id = "counter",
     div(
-      tags$button("-") |> on_click("decrement"),
+      mvu_button("-") |> on_click("decrement"),
       tags$span() |> bind_text("model.count"),
-      tags$button("+") |> on_click("increment")
+      mvu_button("+") |> on_click("increment")
     )
   )
 )

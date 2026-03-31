@@ -165,7 +165,7 @@ test_that("on_input with debounce finds input inside wrapper", {
 test_that("mvu_button generates styled button", {
   btn <- mvu_button("Go")
   expect_equal(btn$name, "button")
-  expect_match(as.character(btn), "btn btn-primary")
+  expect_match(as.character(btn), "btn btn-default")
   expect_match(as.character(btn), "Go")
 })
 
@@ -393,4 +393,170 @@ test_that("mvu_file_input with accept and multiple", {
   html <- as.character(fi)
   expect_match(html, "image/\\*")
   expect_match(html, "multiple")
+})
+
+# -- Shiny parity tests -------------------------------------------------------
+#
+# Strip framework-specific attributes from both Shiny and MVU HTML, then
+# compare. Inputs with fundamentally different implementations (slider,
+# file, date) are excluded.
+
+strip_shiny <- function(html) {
+  html <- gsub(' id="[^"]*"', "", html)
+  html <- gsub(' for="[^"]*"', "", html)
+  html <- gsub(' name="[^"]*"', "", html)
+  html <- gsub(' data-[a-z-]+="[^"]*"', "", html)
+  html <- gsub(' role="[^"]*"', "", html)
+  html <- gsub(' aria-[a-z-]+="[^"]*"', "", html)
+  html <- gsub(' value="[^"]*"', "", html)
+  html <- gsub(" selected", "", html)
+  html <- gsub(' checked="checked"', "", html)
+  shiny_classes <- c(
+    "shiny-input-container-inline",
+    "shiny-input-checkboxgroup", "shiny-input-radiogroup",
+    "shiny-input-container", "shiny-input-textarea",
+    "shiny-input-password", "shiny-input-checkbox",
+    "shiny-input-number", "shiny-input-select",
+    "shiny-input-text", "shiny-input-file",
+    "shiny-options-group", "shiny-label-null", "action-button"
+  )
+  for (cls in shiny_classes) {
+    html <- gsub(paste0(" ?", cls), "", html)
+  }
+  html <- gsub(' class=""', "", html)
+  html <- gsub('class=" ', 'class="', html)
+  html <- gsub("\\s+", " ", html)
+  html <- gsub("> <", "><", html)
+  trimws(html)
+}
+
+strip_mvu <- function(html) {
+  html <- gsub(' id="[^"]*"', "", html)
+  html <- gsub(' for="[^"]*"', "", html)
+  html <- gsub(' name="[^"]*"', "", html)
+  html <- gsub(' value="[^"]*"', "", html)
+  html <- gsub(' @[a-z.0-9]+="[^"]*"', "", html)
+  html <- gsub(' x-bind:[a-z-]+="[^"]*"', "", html)
+  html <- gsub("\\s+", " ", html)
+  html <- gsub("> <", "><", html)
+  trimws(html)
+}
+
+test_that("mvu_button matches shiny::actionButton", {
+  shiny_html <- as.character(shiny::actionButton("id", "Go"))
+  mvu_html <- as.character(mvu_button("Go"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_button with width matches shiny::actionButton", {
+  shiny_html <- as.character(shiny::actionButton("id", "Go", width = "200px"))
+  mvu_html <- as.character(mvu_button("Go", width = "200px"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_text_input matches shiny::textInput", {
+  shiny_html <- as.character(shiny::textInput("id", "Name"))
+  mvu_html <- as.character(mvu_text_input("Name"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_text_input with placeholder matches shiny::textInput", {
+  shiny_html <- as.character(
+    shiny::textInput("id", "Name", placeholder = "Enter name")
+  )
+  mvu_html <- as.character(mvu_text_input("Name", placeholder = "Enter name"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_text_input with width matches shiny::textInput", {
+  shiny_html <- as.character(shiny::textInput("id", "Name", width = "300px"))
+  mvu_html <- as.character(mvu_text_input("Name", width = "300px"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_numeric_input matches shiny::numericInput", {
+  shiny_html <- as.character(
+    shiny::numericInput("id", "Age", value = 0, min = 0, max = 120)
+  )
+  mvu_html <- as.character(mvu_numeric_input("Age", min = 0, max = 120))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_password_input matches shiny::passwordInput", {
+  shiny_html <- as.character(shiny::passwordInput("id", "Password"))
+  mvu_html <- as.character(mvu_password_input("Password"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_textarea_input matches shiny::textAreaInput", {
+  shiny_html <- as.character(shiny::textAreaInput("id", "Bio", rows = 4))
+  mvu_html <- as.character(mvu_textarea_input("Bio", rows = 4))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_select_input matches shiny::selectInput", {
+  shiny_html <- as.character(
+    shiny::selectInput("id", "Color",
+      choices = c("Red" = "red", "Blue" = "blue"),
+      selectize = FALSE
+    )
+  )
+  mvu_html <- as.character(
+    mvu_select_input("Color", choices = c("Red" = "red", "Blue" = "blue"))
+  )
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_checkbox_input matches shiny::checkboxInput", {
+  shiny_html <- as.character(shiny::checkboxInput("id", "Agree"))
+  mvu_html <- as.character(mvu_checkbox_input("Agree"))
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_checkbox_group_input matches shiny::checkboxGroupInput", {
+  shiny_html <- as.character(
+    shiny::checkboxGroupInput("id", "Toppings", c("Cheese", "Peppers"))
+  )
+  mvu_html <- as.character(
+    mvu_checkbox_group_input("Toppings", c("Cheese", "Peppers"),
+      msg = "toggle", selected = "model.sel"
+    )
+  )
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_checkbox_group_input inline matches shiny", {
+  shiny_html <- as.character(
+    shiny::checkboxGroupInput("id", "T", c("A", "B"), inline = TRUE)
+  )
+  mvu_html <- as.character(
+    mvu_checkbox_group_input("T", c("A", "B"),
+      msg = "tog", selected = "model.s", inline = TRUE
+    )
+  )
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_radio_input matches shiny::radioButtons", {
+  shiny_html <- as.character(
+    shiny::radioButtons("id", "Pet", c("Dog" = "dog", "Cat" = "cat"))
+  )
+  mvu_html <- as.character(
+    mvu_radio_input("Pet", c("Dog" = "dog", "Cat" = "cat"),
+      msg = "set_pet", selected = "model.pet"
+    )
+  )
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
+})
+
+test_that("mvu_radio_input inline matches shiny", {
+  shiny_html <- as.character(
+    shiny::radioButtons("id", "P", c("X" = "x", "Y" = "y"), inline = TRUE)
+  )
+  mvu_html <- as.character(
+    mvu_radio_input("P", c("X" = "x", "Y" = "y"),
+      msg = "set", selected = "model.p", inline = TRUE
+    )
+  )
+  expect_equal(strip_shiny(shiny_html), strip_mvu(mvu_html))
 })
