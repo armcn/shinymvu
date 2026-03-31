@@ -17,87 +17,33 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-**shinymvu brings the Model-View-Update architecture to Shiny.** It helps you
-build interactive applications where state is predictable, changes are
-explicit, and logic is testable.
+**shinymvu brings the Model-View-Update architecture to Shiny.** It
+helps you build interactive applications where state is predictable,
+changes are explicit, and logic is testable.
 
 This guide will:
 
 - Teach you the fundamentals of the Model-View-Update pattern.
 - Show you how to build interactive apps with shinymvu.
-- Emphasize principles and patterns that make Shiny applications easier to
-  reason about.
+- Emphasize principles and patterns that make Shiny applications easier
+  to reason about.
 
 By the end you will be able to create well-structured Shiny apps with
-shinymvu, and understand the core ideas that make this architecture work. If
-you are on the fence, I can safely guarantee that if you give shinymvu a shot
-and actually make a project with it, you will end up writing better Shiny code.
-The ideas transfer pretty easily!
-
-## A Quick Sample
-
-Here is a little program that lets you increment and decrement a number:
-
-```{r}
-library(shiny)
-library(shinymvu)
-
-init <- function() list(count = 0)
-
-update <- function(model, msg, value) {
-  switch(msg,
-    increment = list_set(model, count = model$count + 1),
-    decrement = list_set(model, count = model$count - 1)
-  )
-}
-
-ui <- fluidPage(
-  mvu_module_ui("counter",
-    div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  mvu_module_server("counter", init = init, update = update)
-}
-
-shinyApp(ui, server)
-```
-
-The code may look unfamiliar at first if you are used to `reactiveVal` and
-`observeEvent`. We will get into how this example works soon!
-
-## Why Model-View-Update?
-
-You can get some benefits from careful state management in standard Shiny, but
-there are some things you can only get from the Model-View-Update architecture:
-
-- **No reactive spaghetti.** State changes flow in one direction through one
-  function. No hunting through observers to find where a value changed.
-- **Pure, testable logic.** Your `update` function is a plain R function. Test
-  it without a running Shiny session.
-- **Exhaustive message handling.** Add a new feature and forget to handle it?
-  You get an error, not a silent bug.
-- **Time-travel debugging.** Step backward and forward through every state
-  transition your app has ever made.
-
-No combination of Shiny patterns can give you all of these guarantees. They
-come from the architecture itself.
+shinymvu, and understand the core ideas that make this architecture
+work. If you are on the fence, I can safely guarantee that if you give
+shinymvu a shot and actually make a project with it, you will end up
+writing better Shiny code. The ideas transfer pretty easily!
 
 # The Model-View-Update Architecture
 
 The Model-View-Update architecture is a pattern for building interactive
-programs. It was created by Evan Czaplicki for the Elm programming language,
-and has since inspired libraries in many other languages (Redux for
-JavaScript, Jetpack Compose for Android, SwiftUI for iOS).
+programs. It was created by Evan Czaplicki for the Elm programming
+language, and has since inspired libraries in many other languages
+(Redux for JavaScript, Jetpack Compose for Android, SwiftUI for iOS).
 
-Rather than someone inventing it for Shiny, the pattern has proven itself
-across many platforms. The core idea is simple: your program always breaks
-into three parts:
+Rather than someone inventing it for Shiny, the pattern has proven
+itself across many platforms. The core idea is simple: your program
+always breaks into three parts:
 
 - **Model** -- the state of your application
 - **Update** -- a way to update your state based on messages
@@ -124,12 +70,13 @@ server <- function(input, output, session) {
 ```
 
 The next few examples are going to show how to use this pattern for user
-input, like buttons and text fields. It will make this much more concrete!
+input, like buttons and text fields. It will make this much more
+concrete!
 
 # Buttons
 
-Our first example is a counter that can be incremented or decremented. Here
-is the full program:
+Our first example is a counter that can be incremented or decremented.
+Here is the full program:
 
 ```{r}
 library(shiny)
@@ -156,9 +103,9 @@ update <- function(model, msg, value) {
 ui <- fluidPage(
   mvu_module_ui("counter",
     div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
+      mvu_button("-") |> on_click("decrement"),
+      tags$span() |> bind_text("model.count"),
+      mvu_button("+") |> on_click("increment")
     )
   )
 )
@@ -176,11 +123,11 @@ together? Let's go through the code and talk about it.
 
 ## Model
 
-Data modeling is extremely important in shinymvu. The point of the model is
-to capture all the details about your application as data.
+Data modeling is extremely important in shinymvu. The point of the model
+is to capture all the details about your application as data.
 
-To make a counter, we need to keep track of a number that is going up and
-down. That means our model is really small this time:
+To make a counter, we need to keep track of a number that is going up
+and down. That means our model is really small this time:
 
 ```{r}
 init <- function() list(count = 0)
@@ -209,38 +156,38 @@ It takes three arguments:
 2. `msg` -- a string describing what happened (e.g. `"increment"`)
 3. `value` -- optional data attached to the message (not used here)
 
-`list_set` returns a new copy of the list with the specified fields changed.
-The original model is never modified. If you get an `"increment"` message,
-you increment the count. If you get a `"decrement"` message, you decrement
-it.
+`list_set` returns a new copy of the list with the specified fields
+changed. The original model is never modified. If you get an
+`"increment"` message, you increment the count. If you get a
+`"decrement"` message, you decrement it.
 
 ## View
 
-We have a model, but how do we show it on screen? That is the role of the
-UI:
+We have a model, but how do we show it on screen? That is the role of
+the UI:
 
 ```{r}
 ui <- fluidPage(
   mvu_module_ui("counter",
     div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
+      mvu_button("-") |> on_click("decrement"),
+      tags$span() |> bind_text("model.count"),
+      mvu_button("+") |> on_click("increment")
     )
   )
 )
 ```
 
-`mvu_module_ui` creates the container for your MVU component. Inside it, we
-place a decrement button, the current count, and an increment button.
+`mvu_module_ui` creates the container for your MVU component. Inside it,
+we place a decrement button, the current count, and an increment button.
 
-Notice that each `mvu_button` has a `msg` argument. This is saying: "when
-someone clicks this button, send this message." So the plus button sends
-`"increment"` and the minus button sends `"decrement"`. Where do these
-messages go? To the `update` function!
+Notice that each `mvu_button` is piped into `on_click()`. This is
+saying: "when someone clicks this button, send this message." So the
+plus button sends `"increment"` and the minus button sends
+`"decrement"`. Where do these messages go? To the `update` function!
 
-The `x-text` attribute is how you display model values. `"model.count"`
-means "show the `count` field from the current model here."
+`bind_text("model.count")` is how you display model values. It means
+"show the `count` field from the current model here."
 
 ## Wiring It Together
 
@@ -257,10 +204,10 @@ calling `init`, renders it on screen, and waits for messages. When a
 message arrives, it calls `update` to get a new model, renders that, and
 repeats.
 
-## Overview
+## How it fits together
 
-Now that you have seen all the parts, it may be easier to see how they fit
-together:
+Now that you have seen all the parts, it may be easier to see how they
+fit together:
 
 1. Render the initial model on screen.
 2. Wait for user input.
@@ -272,17 +219,18 @@ together:
 This is the essence of the Model-View-Update architecture. Every example
 from now on will be a slight variation on this basic pattern.
 
-**Exercise:** Add a button to reset the counter to zero. You will need to:
+**Exercise:** Add a button to reset the counter to zero. You will need
+to:
 
 1. Add a `"reset"` branch in the `update` function
-2. Add a `mvu_button("Reset", msg = "reset")` in the UI
+2. Add a `mvu_button("Reset") |> on_click("reset")` in the UI
 
 If that goes well, try adding a button that increments by 10.
 
 # Text Fields
 
-We are about to create a simple app that reverses the contents of a text
-field.
+We are about to create a simple app that reverses the contents of a
+text field.
 
 ```{r}
 library(shiny)
@@ -308,9 +256,11 @@ update <- function(model, msg, value) {
 ui <- fluidPage(
   mvu_module_ui("app",
     div(
-      mvu_text_input("Text to reverse", msg = "change",
-        value = "model.content"),
-      tags$div(`x-text` = "model.content.split('').reverse().join('')")
+      mvu_text_input("Text to reverse") |>
+        bind_value("model.content") |>
+        on_input("change"),
+      tags$div() |>
+        bind_text("model.content.split('').reverse().join('')")
     )
   )
 )
@@ -322,25 +272,26 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-This code is a slight variant of the previous example. You set up a model.
-You define some messages. You say how to `update`. You make your view. The
-difference is just in how we filled this skeleton in.
+This code is a slight variant of the previous example. You set up a
+model. You define some messages. You say how to `update`. You make your
+view. The difference is just in how we filled this skeleton in.
 
 ## Model
 
-We know we have to keep track of whatever the user has typed into the text
-field. We need that information so we can show the reversed text. So we go
-with:
+We know we have to keep track of whatever the user has typed into the
+text field. We need that information so we can show the reversed text.
+So we go with:
 
 ```{r}
 init <- function() list(content = "")
 ```
 
-I always try to start with a minimal model, maybe with just one field. I
-then attempt to write the view and `update` function. That often reveals
-that I need to add more to my model. Building the model gradually like this
-means I can have a working program through the development process. It may
-not have all the features yet, but it is getting there!
+I always try to start with a minimal model, maybe with just one field.
+I then attempt to write the view and `update` function. That often
+reveals that I need to add more to my model. Building the model
+gradually like this means I can have a working program through the
+development process. It may not have all the features yet, but it is
+getting there!
 
 ## Update
 
@@ -355,31 +306,35 @@ update <- function(model, msg, value) {
 }
 ```
 
-When we receive a `"change"` message, we update the `content` of our model
-with the new text. `value` contains the current text from the input field.
+When we receive a `"change"` message, we update the `content` of our
+model with the new text. `value` contains the current text from the
+input field.
 
 ## View
 
 ```{r}
-mvu_text_input("Text to reverse", msg = "change", value = "model.content")
+mvu_text_input("Text to reverse") |>
+  bind_value("model.content") |>
+  on_input("change")
 ```
 
-`mvu_text_input` creates a text input that sends a `"change"` message
-every time the user types. The `value` argument binds the input's display
-to the model, so the input always shows the current model value.
+`mvu_text_input` creates a text input with a label. Piping it into
+`bind_value("model.content")` keeps the input in sync with the model.
+Piping into `on_input("change")` sends a `"change"` message every time
+the user types.
 
-The reversed text is displayed using a JavaScript expression in `x-text`.
-Because the view is rendered in the browser, you have access to JavaScript
-string methods for display logic.
+The reversed text is displayed using a JavaScript expression in
+`bind_text()`. Because the view is rendered in the browser, you have
+access to JavaScript string methods for display logic.
 
-**Exercise:** Show the length of the content below the reversed text. You
-can use `model.content.length` in an `x-text` expression.
+**Exercise:** Show the length of the content below the reversed text.
+You can use `bind_text("model.content.length")` on a `tags$span()`.
 
 # Forms
 
-Now we will make a rudimentary form. It has a field for your name, a field
-for your password, and a field to verify that password. We will also do
-some simple validation to check if the passwords match.
+Now we will make a rudimentary form. It has a field for your name, a
+field for your password, and a field to verify that password. We will
+also do some simple validation to check if the passwords match.
 
 ```{r}
 library(shiny)
@@ -409,22 +364,25 @@ update <- function(model, msg, value) {
 ui <- fluidPage(
   mvu_module_ui("app",
     div(
-      mvu_text_input("Name", msg = "set_name", value = "model.name"),
-      mvu_password_input("Password", msg = "set_password",
-        value = "model.password"),
-      mvu_password_input("Re-enter Password", msg = "set_password_again",
-        value = "model.password_again"),
-      tags$div(
-        `x-show` = "model.password.length > 0",
-        `x-bind:style` = paste0(
+      mvu_text_input("Name") |>
+        bind_value("model.name") |>
+        on_input("set_name"),
+      mvu_password_input("Password") |>
+        bind_value("model.password") |>
+        on_input("set_password"),
+      mvu_password_input("Re-enter Password") |>
+        bind_value("model.password_again") |>
+        on_input("set_password_again"),
+      tags$div() |>
+        bind_show("model.password.length > 0") |>
+        bind_style(paste0(
           "model.password === model.password_again",
           " ? 'color: green' : 'color: red'"
-        ),
-        `x-text` = paste0(
+        )) |>
+        bind_text(paste0(
           "model.password === model.password_again",
           " ? 'OK' : 'Passwords do not match!'"
-        )
-      )
+        ))
     )
   )
 )
@@ -468,10 +426,10 @@ Each branch uses `list_set` to update the appropriate field.
 
 ## View
 
-The validation logic is handled entirely in the view using `x-bind:style`
-and `x-text` expressions. The model holds the raw data; the view decides
-how to present it. This is a good pattern -- keep your model simple and
-derive display logic in the view.
+The validation logic is handled entirely in the view using
+`bind_style()` and `bind_text()` expressions. The model holds the raw
+data; the view decides how to present it. This is a good pattern --
+keep your model simple and derive display logic in the view.
 
 **Exercise:** Try adding these features to the validation display:
 
@@ -485,9 +443,9 @@ handled. shinymvu provides `mvu_enum()` and `match_enum()` for this.
 
 ## The Problem
 
-With `switch`, forgetting to handle a message is a silent bug. If you add
-a new message type and forget to update your `switch`, R returns `NULL`
-and your model silently becomes `NULL`. Good luck debugging that.
+With `switch`, forgetting to handle a message is a silent bug. If you
+add a new message type and forget to update your `switch`, R returns
+`NULL` and your model silently becomes `NULL`. Good luck debugging that.
 
 ## The Solution
 
@@ -522,8 +480,8 @@ mvu_module_server("counter",
 
 ## Default Cases
 
-Sometimes you want to handle a few cases explicitly and ignore the rest.
-Use `.default` for that:
+Sometimes you want to handle a few cases explicitly and ignore the
+rest. Use `.default` for that:
 
 ```{r}
 match_enum(Msg(msg),
@@ -534,10 +492,10 @@ match_enum(Msg(msg),
 
 # Commands and Subscriptions
 
-So far all of our programs have been self-contained. The `update` function
-takes the current model and a message and returns a new model. But what
-about talking to servers? Running expensive computations? Responding to
-external data?
+So far all of our programs have been self-contained. The `update`
+function takes the current model and a message and returns a new model.
+But what about talking to servers? Running expensive computations?
+Responding to external data?
 
 ## The Basic Pattern
 
@@ -548,15 +506,15 @@ So far, the pattern has been:
 3. `update` returns a new model.
 4. The view re-renders.
 
-This works great for pure state transitions. But sometimes `update` needs
-to *describe* a side effect that the runtime should carry out. That is
-where commands come in.
+This works great for pure state transitions. But sometimes `update`
+needs to *describe* a side effect that the runtime should carry out.
+That is where commands come in.
 
 ## Commands
 
 A command is a description of work the runtime should do after a state
-transition. The `update` function stays pure -- it *describes* the effect
-as data rather than performing it.
+transition. The `update` function stays pure -- it *describes* the
+effect as data rather than performing it.
 
 Use `mvu_result()` to return both a new model and one or more effects:
 
@@ -589,9 +547,9 @@ effect_custom(function(session) {
 
 ## Async Commands
 
-The most powerful effect type is `effect_cmd()`. It runs a function in a
-background R process and dispatches the result back as a new message when
-it completes. Your app stays interactive while the work runs.
+The most powerful effect type is `effect_cmd()`. It runs a function in
+a background R process and dispatches the result back as a new message
+when it completes. Your app stays interactive while the work runs.
 
 ```{r}
 library(shiny)
@@ -621,7 +579,8 @@ When the user triggers `"fetch"`:
 1. The model immediately updates to `loading = TRUE`.
 2. The runtime starts `expensive_work` in a background process.
 3. The app stays interactive -- buttons work, other modules respond.
-4. When the work finishes, a `"fetched"` message arrives with the result.
+4. When the work finishes, a `"fetched"` message arrives with the
+   result.
 5. The model updates to `loading = FALSE` with the new data.
 
 You can also handle errors with `error_msg`:
@@ -640,12 +599,12 @@ effect_cmd(
 
 ## Subscriptions
 
-Commands are for one-off tasks. But what about ongoing events from outside
-your component? That is where subscriptions come in.
+Commands are for one-off tasks. But what about ongoing events from
+outside your component? That is where subscriptions come in.
 
-A subscription connects an external reactive source to your MVU loop. When
-the reactive changes, a message is dispatched through `update`, just like
-a button click.
+A subscription connects an external reactive source to your MVU loop.
+When the reactive changes, a message is dispatched through `update`,
+just like a button click.
 
 ```{r}
 mvu_module_server("dashboard",
@@ -657,8 +616,9 @@ mvu_module_server("dashboard",
 ```
 
 `subscriptions` is a function that returns a named list. The names are
-message types; the values are reactive expressions. When `filter_model()`
-changes, the runtime dispatches `"filters_changed"` with the new value.
+message types; the values are reactive expressions. When
+`filter_model()` changes, the runtime dispatches `"filters_changed"`
+with the new value.
 
 This is how MVU modules communicate. Module A returns its model (a
 `reactiveVal`). Module B subscribes to it:
@@ -687,16 +647,17 @@ Subscriptions work with any Shiny reactive -- `reactiveVal`,
 
 shinymvu uses [Alpine.js](https://alpinejs.dev/) to render the model in
 the browser. The server pushes the model as JSON, and Alpine.js updates
-the DOM reactively. You write standard HTML with a few special attributes.
+the DOM reactively. You write standard HTML with pipe helpers that add
+the right attributes.
 
 ## Displaying Values
 
-Use `x-text` to display model fields as text:
+Use `bind_text()` to display model fields as text:
 
 ```{r}
-tags$span(`x-text` = "model.count")
-tags$h1(`x-text` = "model.title")
-tags$p(`x-text` = "'Hello, ' + model.name + '!'")
+tags$span() |> bind_text("model.count")
+tags$h1() |> bind_text("model.title")
+tags$p() |> bind_text("'Hello, ' + model.name + '!'")
 ```
 
 The value is a JavaScript expression. You have access to the full model
@@ -704,51 +665,51 @@ object and standard JavaScript operators.
 
 ## Conditional Display
 
-Use `x-show` to show or hide elements:
+Use `bind_show()` to show or hide elements:
 
 ```{r}
-tags$div(`x-show` = "model.loading", "Loading...")
-tags$div(`x-show` = "model.items.length > 0", "Items found")
+tags$div("Loading...") |> bind_show("model.loading")
+tags$div("Items found") |> bind_show("model.items.length > 0")
 ```
 
 ## Lists
 
-Use `x-for` inside a `tags$template` to render lists:
+Use `bind_for()` inside a `tags$template` to render lists:
 
 ```{r}
 tags$ul(
-  tags$template(`x-for` = "item in model.items",
-    tags$li(`x-text` = "item.name")
-  )
+  tags$template(
+    tags$li() |> bind_text("item.name")
+  ) |> bind_for("item", "model.items")
 )
 ```
 
 ## Dynamic Attributes
 
-Use `x-bind` to set attributes based on the model:
+Use `bind_class()` and `bind_style()` to set attributes based on the
+model:
 
 ```{r}
-tags$div(
-  `x-bind:class` = "{ 'text-danger': model.hasError }",
-  `x-bind:style` = "'font-size: ' + model.fontSize + 'px'"
-)
+tags$div() |>
+  bind_class("{ 'text-danger': model.hasError }") |>
+  bind_style("'font-size: ' + model.fontSize + 'px'")
 ```
 
 ## Sending Messages
 
-The `send()` function dispatches messages from the view. All `mvu_*`
-input helpers use it internally, but you can also call it directly:
+The pipe helpers use a `send()` function internally to dispatch
+messages. All `on_*` event helpers build on it:
 
 ```{r}
-tags$button(`@click` = "send('delete', item.id)", "Delete")
-tags$input(`@input` = "send('search', $event.target.value)")
+mvu_button("Delete") |> on_click("delete")
+mvu_text_input("Search") |> bind_value("model.query") |> on_input("search")
 ```
 
 ## to_frontend
 
-By default, the entire model is sent to the browser as JSON. If you need
-to derive display values, add computed fields, or reshape data for the
-view, use the `to_frontend` function:
+By default, the entire model is sent to the browser as JSON. If you
+need to derive display values, add computed fields, or reshape data for
+the view, use the `to_frontend` function:
 
 ```{r}
 to_frontend <- function(model) {
@@ -764,45 +725,50 @@ mvu_module_server("app",
 )
 ```
 
-The view sees `model.is_even` and `model.display` even though those fields
-do not exist in the model itself. This keeps your model lean and your
-display logic explicit.
+The view sees `model.is_even` and `model.display` even though those
+fields do not exist in the model itself. This keeps your model lean and
+your display logic explicit.
 
 # Inputs
 
-shinymvu provides wrappers for standard Shiny inputs. Instead of using
-`inputId` and `observeEvent`, each input dispatches an MVU message
-directly:
+shinymvu provides structural helpers that match Shiny's native inputs.
+Each helper creates the HTML markup (label, form element, styling), and
+you add MVU wiring with pipe helpers:
 
 ```{r}
 # Buttons
-mvu_button("Click me", msg = "clicked")
-mvu_button("Save", msg = "save", class = "btn btn-primary")
+mvu_button("Click me") |> on_click("clicked")
+mvu_button("Save", class = "btn btn-primary") |> on_click("save")
 
 # Text
-mvu_text_input("Name", msg = "set_name", value = "model.name")
-mvu_password_input("Password", msg = "set_pw", value = "model.pw")
-mvu_textarea_input("Bio", msg = "set_bio", value = "model.bio")
+mvu_text_input("Name") |> bind_value("model.name") |> on_input("set_name")
+mvu_password_input("Password") |>
+  bind_value("model.pw") |> on_input("set_pw")
+mvu_textarea_input("Bio") |> bind_value("model.bio") |> on_input("set_bio")
 
 # Selection
-mvu_select_input("Color", choices = c("Red", "Blue"), msg = "set_color",
-  value = "model.color")
-mvu_radio_input("Size", choices = c("S", "M", "L"), msg = "set_size",
-  selected = "model.size")
-mvu_checkbox_input("Agree", msg = "toggle_agree", value = "model.agree")
+mvu_select_input("Color", choices = c("Red", "Blue")) |>
+  bind_value("model.color") |> on_input("set_color")
+mvu_radio_input("Size", choices = c("S", "M", "L"),
+  msg = "set_size", selected = "model.size")
+mvu_checkbox_input("Agree") |>
+  bind_checked("model.agree") |> on_check("toggle_agree")
 
 # Numeric
-mvu_numeric_input("Count", msg = "set_count", value = "model.count")
-mvu_slider_input("Volume", min = 0, max = 100, msg = "set_vol",
-  value = "model.volume")
+mvu_numeric_input("Count") |>
+  bind_value("model.count") |> on_input_num("set_count")
+mvu_slider_input("Volume", min = 0, max = 100) |>
+  bind_value("model.volume") |> on_input_num("set_vol")
 
 # Date
-mvu_date_input("Start", msg = "set_start", value = "model.start")
+mvu_date_input("Start") |>
+  bind_value("model.start") |> on_input("set_start")
 ```
 
-The `value` (or `selected`) argument binds the input's display to a model
-field so that it always reflects the current state. The `msg` argument
-specifies which message to send when the user interacts with the input.
+`bind_value()` (or `bind_checked()`) keeps the input in sync with the
+model. The `on_*` helper specifies which message to send when the user
+interacts with the input. Radio and checkbox group inputs include `msg`
+and `selected` directly because each choice needs its own wiring.
 
 # Immutable Updates
 
@@ -842,13 +808,13 @@ These functions always return a new list. The original is never changed.
 
 # Testing
 
-Because `update` is a pure function, you can test your entire application
-logic with plain unit tests. No Shiny session needed.
+Because `update` is a pure function, you can test your entire
+application logic with plain unit tests. No Shiny session needed.
 
 ## mvu_dispatch
 
-`mvu_dispatch()` simulates the MVU runtime loop by applying a sequence of
-messages:
+`mvu_dispatch()` simulates the MVU runtime loop by applying a sequence
+of messages:
 
 ```{r}
 test_that("three increments produce count of 3", {
@@ -886,8 +852,8 @@ test_that("set_name updates the name", {
 
 ## Collecting Effects
 
-Use `.collect_effects = TRUE` to inspect which effects your update function
-would have triggered:
+Use `.collect_effects = TRUE` to inspect which effects your update
+function would have triggered:
 
 ```{r}
 test_that("save produces a notification", {
@@ -918,17 +884,18 @@ mvu_module_server("app",
 
 This adds a small overlay to your app that:
 
-- **Records every state transition.** Every message, the model before, and
-  the model after are logged.
-- **Steps backward and forward.** Click through the history to see exactly
-  how each message changed the model.
-- **Inspects the model.** A tree view shows the current model state at any
-  point in the history.
-- **Imports and exports sessions.** Save the message history to a JSON file
-  and replay it later.
+- **Records every state transition.** Every message, the model before,
+  and the model after are logged.
+- **Steps backward and forward.** Click through the history to see
+  exactly how each message changed the model.
+- **Inspects the model.** A tree view shows the current model state at
+  any point in the history.
+- **Imports and exports sessions.** Save the message history to a JSON
+  file and replay it later.
 
-The debugger works with any app or module. Subscription messages and async
-command results appear in the timeline alongside regular UI messages.
+The debugger works with any app or module. Subscription messages and
+async command results appear in the timeline alongside regular UI
+messages.
 
 # Using Modules
 
@@ -948,9 +915,9 @@ Wrap your init, update, and UI in standard Shiny module functions:
 counter_ui <- function(id) {
   mvu_module_ui(id,
     div(
-      mvu_button("-", msg = "decrement"),
-      tags$span(`x-text` = "model.count"),
-      mvu_button("+", msg = "increment")
+      mvu_button("-") |> on_click("decrement"),
+      tags$span() |> bind_text("model.count"),
+      mvu_button("+") |> on_click("increment")
     )
   )
 }
@@ -997,8 +964,8 @@ server <- function(input, output, session) {
 
 ## Module Communication
 
-Use subscriptions to connect modules. Module A returns its model; module B
-subscribes to it:
+Use subscriptions to connect modules. Module A returns its model;
+module B subscribes to it:
 
 ```{r}
 server <- function(input, output, session) {
@@ -1017,42 +984,8 @@ dashboard_server <- function(id, filter_model) {
 }
 ```
 
-When the filter model changes, `"filters_changed"` is dispatched through
-the dashboard's `update` function with the new filter values.
-
-# Installation
-
-```{r}
-# install.packages("pak")
-pak::pak("armcn/shinymvu")
-```
-
-For async commands (`effect_cmd`), also install the `future` package:
-
-```{r}
-install.packages("future")
-```
-
-# Examples
-
-shinymvu ships with several example apps. Run them with:
-
-```{r}
-# Minimal counter
-shiny::runApp(system.file("examples/counter", package = "shinymvu"))
-
-# TodoMVC
-shiny::runApp(system.file("examples/todomvc", package = "shinymvu"))
-
-# Async commands (background tasks)
-shiny::runApp(system.file("examples/async", package = "shinymvu"))
-
-# Subscriptions (module communication)
-shiny::runApp(system.file("examples/subscriptions", package = "shinymvu"))
-
-# Input gallery
-shiny::runApp(system.file("examples/gallery", package = "shinymvu"))
-```
+When the filter model changes, `"filters_changed"` is dispatched
+through the dashboard's `update` function with the new filter values.
 
 # Next Steps
 
@@ -1060,7 +993,7 @@ You now understand the core concepts of shinymvu:
 
 - **Model** -- all your state in one list
 - **Update** -- one pure function that handles every state transition
-- **View** -- HTML with Alpine.js expressions to display the model
+- **View** -- HTML with pipe helpers to display the model
 - **Commands** -- async effects that feed results back through update
 - **Subscriptions** -- external reactive sources that produce messages
 
