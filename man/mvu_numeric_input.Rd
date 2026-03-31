@@ -4,45 +4,34 @@
 \alias{mvu_numeric_input}
 \title{Numeric Input}
 \usage{
-mvu_numeric_input(
-  label,
-  msg,
-  value = NULL,
-  min = NULL,
-  max = NULL,
-  step = NULL,
-  debounce = NULL,
-  class = "form-control",
-  ...
-)
+mvu_numeric_input(label, min = NA, max = NA, step = NA, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
+\item{min}{Minimum allowed value.}
 
-\item{value}{An Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Keeps the input in sync with the model.}
+\item{max}{Maximum allowed value.}
 
-\item{min, max, step}{Numeric constraints for the input.}
+\item{step}{Interval between valid values.}
 
-\item{debounce}{Debounce delay in milliseconds. When set, sends on
-every keystroke (debounced) instead of on blur.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
+A \verb{<div>} containing a label and number input.
 }
 \description{
-A number \verb{<input>} that dispatches its numeric value as an MVU message.
+Creates a number input with a label, matching the structure of
+\code{\link[shiny:numericInput]{shiny::numericInput()}}. Add model binding and event handling via
+\code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input_num]{on_input_num()}}.
 }
 \examples{
-mvu_numeric_input("Age",
-  msg = "set_age", value = "model.age",
-  min = 0, max = 120
-)
+mvu_numeric_input("Age", min = 0, max = 120) |>
+  bind_value("model.age") |>
+  on_input_num("set_age")
 
 }

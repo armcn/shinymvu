@@ -4,40 +4,35 @@
 \alias{mvu_text_input}
 \title{Text Input}
 \usage{
-mvu_text_input(
-  label,
-  msg,
-  value = NULL,
-  placeholder = NULL,
-  debounce = NULL,
-  class = "form-control",
-  ...
-)
+mvu_text_input(label, placeholder = NULL, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
+\item{placeholder}{A character string giving the user a hint as
+to what can be entered into the control.}
 
-\item{value}{An Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Keeps the input in sync with the model.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{placeholder}{Placeholder text.}
-
-\item{debounce}{Debounce delay in milliseconds. When set, sends on
-every keystroke (debounced) instead of on blur.}
-
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
+A \verb{<div>} containing a label and text input.
 }
 \description{
-A text \verb{<input>} that dispatches its value as an MVU message on change.
+Creates a text input with a label, matching the structure of
+\code{\link[shiny:textInput]{shiny::textInput()}}. Add model binding and event handling via
+\code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
 }
 \examples{
-mvu_text_input("Name", msg = "set_name", value = "model.name")
+mvu_text_input("Name") |>
+  bind_value("model.name") |>
+  on_input("set_name")
+
+mvu_text_input("Search", placeholder = "Type to search...") |>
+  bind_value("model.search") |>
+  on_input("set_search", debounce = 300)
 
 }

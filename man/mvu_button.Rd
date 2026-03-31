@@ -4,16 +4,14 @@
 \alias{mvu_button}
 \title{Action Button}
 \usage{
-mvu_button(label, msg, value = NULL, class = "btn btn-primary", ...)
+mvu_button(label, class = "btn btn-primary", width = NULL, ...)
 }
 \arguments{
 \item{label}{The button label.}
 
-\item{msg}{Message type to dispatch.}
+\item{class}{CSS classes. Defaults to Bootstrap 5 primary button.}
 
-\item{value}{Optional static value sent with the message.}
-
-\item{class}{CSS classes. Defaults to Bootstrap primary button.}
+\item{width}{The width of the button (e.g. \code{"100\\\%"}).}
 
 \item{...}{Additional HTML attributes.}
 }
@@ -21,10 +19,10 @@ mvu_button(label, msg, value = NULL, class = "btn btn-primary", ...)
 A \verb{<button>} tag.
 }
 \description{
-A \verb{<button>} that dispatches an MVU message on click.
+Creates a Bootstrap button. Add click handling with \code{\link[=on_click]{on_click()}}.
 }
 \examples{
-mvu_button("Click me", msg = "clicked")
-mvu_button("+1", msg = "add", value = 1)
+mvu_button("Click me") |> on_click("clicked")
+mvu_button("Delete", class = "btn btn-danger")
 
 }

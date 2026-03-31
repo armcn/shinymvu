@@ -4,43 +4,33 @@
 \alias{mvu_textarea_input}
 \title{Textarea Input}
 \usage{
-mvu_textarea_input(
-  label,
-  msg,
-  value = NULL,
-  rows = 3,
-  placeholder = NULL,
-  debounce = NULL,
-  class = "form-control",
-  ...
-)
+mvu_textarea_input(label, rows = 3, placeholder = NULL, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
-
-\item{msg}{Message type to dispatch.}
-
-\item{value}{An Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Keeps the input in sync with the model.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
 \item{rows}{Number of visible text rows.}
 
-\item{placeholder}{Placeholder text.}
+\item{placeholder}{A character string giving the user a hint as
+to what can be entered into the control.}
 
-\item{debounce}{Debounce delay in milliseconds. When set, sends on
-every keystroke (debounced) instead of on blur.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and textarea.
+A \verb{<div>} containing a label and textarea.
 }
 \description{
-A \verb{<textarea>} that dispatches its value as an MVU message.
+Creates a textarea with a label, matching the structure of
+\code{\link[shiny:textAreaInput]{shiny::textAreaInput()}}. Add model binding and event handling
+via \code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
 }
 \examples{
-mvu_textarea_input("Bio", msg = "set_bio", value = "model.bio", rows = 4)
+mvu_textarea_input("Bio", rows = 4) |>
+  bind_value("model.bio") |>
+  on_input("set_bio", debounce = 300)
 
 }

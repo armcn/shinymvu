@@ -6,46 +6,45 @@
 \usage{
 mvu_date_range_input(
   label,
-  msg_start,
-  msg_end,
-  start = NULL,
-  end = NULL,
   min = NULL,
   max = NULL,
-  label_start = "Start",
-  label_end = "End",
-  class = "form-control",
+  start_label = "Start",
+  end_label = "End",
+  width = NULL,
   ...
 )
 }
 \arguments{
-\item{label}{Group label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg_start, msg_end}{Message types for the start and end dates.}
-
-\item{start, end}{Alpine.js expressions for the start and end date
-values. Keeps the inputs in sync with the model.}
-
-\item{min, max}{Date constraints (character strings in \code{"YYYY-MM-DD"}
+\item{min}{Minimum date (character string in \code{"YYYY-MM-DD"}
 format).}
 
-\item{label_start, label_end}{Labels for the individual date inputs.}
+\item{max}{Maximum date (character string in \code{"YYYY-MM-DD"}
+format).}
 
-\item{class}{CSS classes for each input.}
+\item{start_label, end_label}{Labels for the start and end date
+inputs.}
 
-\item{...}{Additional HTML attributes on each input.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
+
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with group label and two date inputs.
+A \verb{<div>} containing a group label and two date inputs.
 }
 \description{
-Two date \verb{<input>} elements for selecting a start and end date. Each
-dispatches a separate MVU message.
+Creates two date inputs side by side, matching the purpose of
+\code{\link[shiny:dateRangeInput]{shiny::dateRangeInput()}}. Each date input can be individually
+wired with \code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
+}
+\details{
+For simpler cases, consider using two \code{\link[=mvu_date_input]{mvu_date_input()}} calls
+directly.
 }
 \examples{
-mvu_date_range_input("Trip dates",
-  msg_start = "set_depart", msg_end = "set_return",
-  start = "model.depart", end = "model.return"
-)
+mvu_date_range_input("Trip Dates")
 
 }

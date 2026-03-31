@@ -7,37 +7,43 @@
 mvu_select_input(
   label,
   choices,
-  msg,
-  selected = NULL,
-  class = "form-select",
+  multiple = FALSE,
+  size = NULL,
+  width = NULL,
   ...
 )
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{choices}{A character vector of option values. If named, names are
-used as display labels.}
+\item{choices}{List of values to select from. If elements are
+named, names are displayed to the user.}
 
-\item{msg}{Message type to dispatch.}
+\item{multiple}{If \code{TRUE}, allow multiple selections.}
 
-\item{selected}{An Alpine.js expression for the currently selected value
-(e.g. \code{"model.color"}). Keeps the dropdown in sync with the model.}
+\item{size}{Number of visible items. When set, renders as a list
+box instead of a dropdown.}
 
-\item{class}{CSS classes for the select.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and select.
+A \verb{<div>} containing a label and select element.
 }
 \description{
-A \verb{<select>} dropdown that dispatches the selected value as an MVU message.
+Creates a select dropdown with a label, matching the structure
+of \code{\link[shiny:selectInput]{shiny::selectInput()}} with \code{selectize = FALSE}. Generates
+\verb{<option>} tags from a choices vector. Add model binding and
+event handling via \code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
 }
 \examples{
 mvu_select_input("Color",
-  choices = c("Red" = "red", "Green" = "green", "Blue" = "blue"),
-  msg = "set_color", selected = "model.color"
-)
+  choices = c("Red" = "red", "Blue" = "blue")
+) |>
+  bind_value("model.color") |>
+  on_input("set_color")
 
 }

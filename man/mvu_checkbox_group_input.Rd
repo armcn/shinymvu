@@ -10,37 +10,50 @@ mvu_checkbox_group_input(
   msg,
   selected = NULL,
   inline = FALSE,
+  width = NULL,
   ...
 )
 }
 \arguments{
-\item{label}{Group label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{choices}{A character vector of values. If named, names are used as
-display labels.}
+\item{choices}{A character vector of values. If named, names are
+used as display labels.}
 
-\item{msg}{Message type dispatched for each toggle.}
+\item{msg}{Character string specifying the message type dispatched
+for each toggle.}
 
-\item{selected}{An Alpine.js expression for the array of currently
-selected values (e.g. \code{"model.toppings"}). Keeps the checkboxes in
-sync with the model.}
+\item{selected}{A JavaScript expression for the array of selected
+values (e.g. \code{"model.toppings"}). Keeps checkboxes in sync with
+the model.}
 
 \item{inline}{If \code{TRUE}, render checkboxes horizontally.}
 
-\item{...}{Additional HTML attributes on each \verb{<input>}.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
+
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with group label and checkboxes.
+A \verb{<div>} containing a label and checkbox group.
 }
 \description{
-A group of checkboxes where each toggle dispatches the same message type
-with the checkbox's value. Your \code{update} function should toggle the value
-in/out of a list.
+Creates a group of checkboxes, matching the structure of
+\code{\link[shiny:checkboxGroupInput]{shiny::checkboxGroupInput()}}. Each checkbox dispatches the same
+message type with the checkbox's value. Your \code{update} function
+should toggle the value in and out of a list.
+}
+\details{
+Because each checkbox requires its own event wiring, the \code{msg}
+and \code{selected} parameters are included here rather than added
+via pipes.
 }
 \examples{
 mvu_checkbox_group_input("Toppings",
   choices = c("Cheese", "Peppers", "Onions"),
-  msg = "toggle_topping", selected = "model.toppings"
+  msg = "toggle_topping",
+  selected = "model.toppings"
 )
 
 }

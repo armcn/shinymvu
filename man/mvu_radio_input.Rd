@@ -4,34 +4,55 @@
 \alias{mvu_radio_input}
 \title{Radio Button Input}
 \usage{
-mvu_radio_input(label, choices, msg, selected = NULL, inline = FALSE, ...)
+mvu_radio_input(
+  label,
+  choices,
+  msg,
+  selected = NULL,
+  inline = FALSE,
+  width = NULL,
+  ...
+)
 }
 \arguments{
-\item{label}{Group label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{choices}{A character vector of values. If named, names are used as
-display labels.}
+\item{choices}{A character vector of values. If named, names are
+used as display labels.}
 
-\item{msg}{Message type to dispatch.}
+\item{msg}{Character string specifying the message type dispatched
+for each toggle.}
 
-\item{selected}{An Alpine.js expression for the currently selected value
-(e.g. \code{"model.pet"}). Keeps the radio buttons in sync with the model.}
+\item{selected}{A JavaScript expression for the currently
+selected value (e.g. \code{"model.pet"}). Keeps the radio buttons
+in sync with the model.}
 
-\item{inline}{If \code{TRUE}, render radio buttons horizontally.}
+\item{inline}{If \code{TRUE}, render checkboxes horizontally.}
 
-\item{...}{Additional HTML attributes on each \verb{<input>}.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
+
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with group label and radio buttons.
+A \verb{<div>} containing a label and radio button group.
 }
 \description{
-A group of radio buttons that dispatch the selected value as an MVU
-message.
+Creates a group of radio buttons, matching the structure of
+\code{\link[shiny:radioButtons]{shiny::radioButtons()}}. Each radio dispatches the selected
+value as a message.
+}
+\details{
+Because each radio button requires its own checked expression,
+the \code{msg} and \code{selected} parameters are included here rather
+than added via pipes.
 }
 \examples{
 mvu_radio_input("Pet",
-  choices = c("Dog" = "dog", "Cat" = "cat", "Fish" = "fish"),
-  msg = "set_pet", selected = "model.pet"
+  choices = c("Dog" = "dog", "Cat" = "cat"),
+  msg = "set_pet",
+  selected = "model.pet"
 )
 
 }

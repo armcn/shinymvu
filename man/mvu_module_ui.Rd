@@ -7,7 +7,6 @@
 mvu_module_ui(
   id,
   ...,
-  view = NULL,
   component = "mvu",
   theme = bslib::bs_theme(),
   extra_js = NULL,
@@ -17,27 +16,21 @@ mvu_module_ui(
 \arguments{
 \item{id}{The module ID string.}
 
-\item{...}{UI elements to include inside the container (when \code{view}
-is not used).}
-
-\item{view}{Optional function with signature \verb{function(m)} where \code{m}
-is a \code{\link[=model_ref]{model_ref()}} proxy. The function should return an htmltools
-tag tree built with \code{\link[=mvu_tag]{mvu_tag()}}, \code{\link[=mvu_text]{mvu_text()}}, \code{\link[=when]{when()}}, \code{\link[=each]{each()}}, etc.
-When provided, \code{...} is ignored.}
+\item{...}{UI elements to include inside the Alpine.js \code{x-data} container.}
 
 \item{component}{Character string naming the Alpine.js component. Defaults
 to \code{"mvu"}.}
 
 \item{theme}{A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object for Bootstrap theming.}
 
-\item{extra_js}{Optional JavaScript string for additional component
-properties.}
+\item{extra_js}{Optional JavaScript string for additional Alpine.js
+component properties.}
 
 \item{extra_channels}{A named list of additional Shiny custom message
 handlers.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} containing the bridge script and
+A \code{\link[htmltools:tagList]{htmltools::tagList()}} containing the bridge script and Alpine.js
 container.
 }
 \description{
@@ -45,28 +38,13 @@ Creates the UI for an MVU component that can be embedded as a Shiny module.
 Handles namespace prefixing so that multiple MVU components on the same
 page do not collide on message channels.
 }
-\details{
-There are two ways to define the content:
-\enumerate{
-\item Pass UI elements directly via \code{...} (original API).
-\item Pass a \code{view} function that receives a model reference proxy and
-returns UI built with \code{\link[=mvu_tag]{mvu_tag()}}, \code{\link[=mvu_text]{mvu_text()}}, \code{\link[=when]{when()}}, \code{\link[=each]{each()}}, etc.
-This hides the runtime implementation and lets you describe intent
-(bind text, send message, conditional rendering) without writing
-framework-specific attributes.
-}
-}
 \examples{
 \dontrun{
-# Using view function (recommended for new code)
 ui <- shiny::fluidPage(
-  mvu_module_ui("counter", view = function(m) {
-    shiny::div(
-      mvu_text(m$count),
-      mvu_tag("button", "-", on_click = msg("decrement")),
-      mvu_tag("button", "+", on_click = msg("increment"))
-    )
-  })
+  mvu_module_ui(
+    "counter",
+    shiny::tags$h1("Counter Module")
+  )
 )
 }
 

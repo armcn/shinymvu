@@ -4,43 +4,40 @@
 \alias{mvu_file_input}
 \title{File Input}
 \usage{
-mvu_file_input(
-  label,
-  msg,
-  accept = NULL,
-  multiple = FALSE,
-  class = "form-control",
-  ...
-)
+mvu_file_input(label, accept = NULL, multiple = FALSE, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
-
-\item{accept}{A character vector of accepted MIME types or file extensions
-(e.g. \code{c(".csv", ".xlsx")} or \code{"image/*"}).}
+\item{accept}{A character vector of accepted MIME types or file
+extensions (e.g. \code{c(".csv", ".xlsx")} or \code{"image/*"}).}
 
 \item{multiple}{If \code{TRUE}, allow selecting multiple files.}
 
-\item{class}{CSS classes for the input.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and file input.
+A \verb{<div>} containing a label and file input.
 }
 \description{
-A file \verb{<input>} that dispatches file metadata (name, size, type) as an
-MVU message when files are selected. File contents are not sent
-automatically; for content access, use Shiny's native file upload or
-custom JavaScript with \code{on_click_expr}.
+Creates a file input with a label, matching the structure of
+\code{\link[shiny:fileInput]{shiny::fileInput()}}. Add event handling via \code{\link[=on_file]{on_file()}}.
+}
+\details{
+File metadata (name, size, type) is sent to the server. File
+contents are not sent automatically.
 }
 \examples{
-mvu_file_input("Upload CSV", msg = "upload", accept = ".csv")
+mvu_file_input("Upload CSV", accept = ".csv") |>
+  on_file("upload")
+
 mvu_file_input("Photos",
-  msg = "upload_photos",
   accept = "image/*", multiple = TRUE
-)
+) |>
+  on_file("upload_photos")
 
 }

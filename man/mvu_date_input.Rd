@@ -4,39 +4,34 @@
 \alias{mvu_date_input}
 \title{Date Input}
 \usage{
-mvu_date_input(
-  label,
-  msg,
-  value = NULL,
-  min = NULL,
-  max = NULL,
-  class = "form-control",
-  ...
-)
+mvu_date_input(label, min = NULL, max = NULL, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
+\item{min}{Minimum date (character string in \code{"YYYY-MM-DD"}
+format).}
 
-\item{value}{An Alpine.js expression for the current date value (e.g.
-\code{"model.birthday"}). Keeps the input in sync with the model.}
+\item{max}{Maximum date (character string in \code{"YYYY-MM-DD"}
+format).}
 
-\item{min, max}{Date range constraints (character strings in
-\code{"YYYY-MM-DD"} format).}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and date input.
+A \verb{<div>} containing a label and date input.
 }
 \description{
-A date \verb{<input>} that dispatches the selected date string as an MVU
-message.
+Creates a date input with a label. Uses the browser's native
+date picker. Add model binding and event handling via
+\code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
 }
 \examples{
-mvu_date_input("Birthday", msg = "set_birthday", value = "model.birthday")
+mvu_date_input("Birthday") |>
+  bind_value("model.birthday") |>
+  on_input("set_birthday")
 
 }

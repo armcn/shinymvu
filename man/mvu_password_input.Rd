@@ -4,40 +4,31 @@
 \alias{mvu_password_input}
 \title{Password Input}
 \usage{
-mvu_password_input(
-  label,
-  msg,
-  value = NULL,
-  placeholder = NULL,
-  debounce = NULL,
-  class = "form-control",
-  ...
-)
+mvu_password_input(label, placeholder = NULL, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
+\item{placeholder}{A character string giving the user a hint as
+to what can be entered into the control.}
 
-\item{value}{An Alpine.js expression for the displayed value (e.g.
-\code{"model.name"}). Keeps the input in sync with the model.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{placeholder}{Placeholder text.}
-
-\item{debounce}{Debounce delay in milliseconds. When set, sends on
-every keystroke (debounced) instead of on blur.}
-
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and input.
+A \verb{<div>} containing a label and password input.
 }
 \description{
-A password \verb{<input>} that dispatches its value as an MVU message.
+Creates a password input with a label, matching the structure of
+\code{\link[shiny:passwordInput]{shiny::passwordInput()}}. Add model binding and event handling
+via \code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input]{on_input()}}.
 }
 \examples{
-mvu_password_input("Password", msg = "set_password")
+mvu_password_input("Password") |>
+  bind_value("model.password") |>
+  on_input("set_password", debounce = 300)
 
 }

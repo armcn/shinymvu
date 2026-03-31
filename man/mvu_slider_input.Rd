@@ -4,43 +4,34 @@
 \alias{mvu_slider_input}
 \title{Slider Input}
 \usage{
-mvu_slider_input(
-  label,
-  min,
-  max,
-  msg,
-  value = NULL,
-  step = 1,
-  class = "form-range",
-  ...
-)
+mvu_slider_input(label, min, max, step = 1, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{min, max}{Numeric range bounds.}
+\item{min}{Minimum value.}
 
-\item{msg}{Message type to dispatch.}
+\item{max}{Maximum value.}
 
-\item{value}{An Alpine.js expression for the current value (e.g.
-\code{"model.volume"}). Keeps the slider in sync with the model.}
+\item{step}{Step increment. Defaults to \code{1}.}
 
-\item{step}{Numeric step increment.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{class}{CSS classes for the input.}
-
-\item{...}{Additional HTML attributes.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \code{\link[htmltools:tagList]{htmltools::tagList()}} with label and range input.
+A \verb{<div>} containing a label and range input.
 }
 \description{
-A range \verb{<input>} that dispatches its numeric value as an MVU message.
+Creates a range input with a label, matching the purpose of
+\code{\link[shiny:sliderInput]{shiny::sliderInput()}}. Add model binding and event handling via
+\code{\link[=bind_value]{bind_value()}} and \code{\link[=on_input_num]{on_input_num()}}.
 }
 \examples{
-mvu_slider_input("Volume",
-  min = 0, max = 100, msg = "set_volume",
-  value = "model.volume"
-)
+mvu_slider_input("Volume", min = 0, max = 100) |>
+  bind_value("model.volume") |>
+  on_input_num("set_volume")
 
 }

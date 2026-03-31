@@ -4,27 +4,28 @@
 \alias{mvu_checkbox_input}
 \title{Checkbox Input}
 \usage{
-mvu_checkbox_input(label, msg, value = NULL, class = "form-check", ...)
+mvu_checkbox_input(label, width = NULL, ...)
 }
 \arguments{
-\item{label}{Label text.}
+\item{label}{Display label for the control, or \code{NULL} for no
+label.}
 
-\item{msg}{Message type to dispatch.}
+\item{width}{The width of the input (e.g. \code{"400px"} or
+\code{"100\\\%"}).}
 
-\item{value}{An Alpine.js expression for the checked state (e.g.
-\code{"model.agree"}). Keeps the checkbox in sync with the model.}
-
-\item{class}{CSS classes for the wrapper div.}
-
-\item{...}{Additional HTML attributes on the \verb{<input>}.}
+\item{...}{Additional HTML attributes passed to the \verb{<input>} tag.}
 }
 \value{
-A \verb{<div>} containing the checkbox and label.
+A \verb{<div>} containing a checkbox and label.
 }
 \description{
-A Bootstrap checkbox that dispatches its checked state as an MVU message.
+Creates a single checkbox with a label, matching the structure
+of \code{\link[shiny:checkboxInput]{shiny::checkboxInput()}}. Add model binding and event handling
+via \code{\link[=bind_checked]{bind_checked()}} and \code{\link[=on_check]{on_check()}}.
 }
 \examples{
-mvu_checkbox_input("I agree", msg = "toggle_agree", value = "model.agree")
+mvu_checkbox_input("I agree to the terms") |>
+  bind_checked("model.agree") |>
+  on_check("toggle_agree")
 
 }
