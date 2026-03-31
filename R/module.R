@@ -35,12 +35,9 @@ mvu_module_ui <- function(id, ..., component = "mvu",
   comp_id <- ns(component)
   js_name <- gsub("-", "_", comp_id)
   tagList(
-    tags$style(HTML("[x-cloak]{display:none!important}")),
+    shinymvu_dep(),
+    alpine_dep(),
     mvu_bridge_js(comp_id, extra_js = extra_js, extra_channels = extra_channels),
-    tags$script(
-      src = "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js",
-      defer = NA
-    ),
     div(`x-data` = js_name, `x-cloak` = NA, ...)
   )
 }

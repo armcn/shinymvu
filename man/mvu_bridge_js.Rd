@@ -2,7 +2,7 @@
 % Please edit documentation in R/page.R
 \name{mvu_bridge_js}
 \alias{mvu_bridge_js}
-\title{Generate Bridge JavaScript for the MVU Runtime}
+\title{Generate Bridge Configuration Script}
 \usage{
 mvu_bridge_js(component = "mvu", extra_js = NULL, extra_channels = NULL)
 }
@@ -19,8 +19,8 @@ handler code strings.}
 An \link[htmltools:builder]{htmltools::tags}\verb{$script} element.
 }
 \description{
-Creates a \verb{<script>} tag that registers an Alpine.js component with
-Shiny message handlers. The bridge connects the client-side Alpine
-reactive model to the server-side MVU runtime loop.
+Creates a \verb{<script>} tag that calls \code{shinymvu.register()} with
+per-component configuration. The static bridge logic lives in
+\code{inst/www/shinymvu/bridge.js} and is loaded via an \code{htmlDependency}.
 }
 \keyword{internal}

@@ -19,23 +19,18 @@ mvu_page <- function(..., component = "mvu",
   bslib::page_fillable(
     theme = theme,
     padding = 0,
-    tags$head(
-      tags$style(HTML("[x-cloak]{display:none!important}")),
-      mvu_bridge_js(component, extra_js = extra_js, extra_channels = extra_channels),
-      tags$script(
-        src = "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js",
-        defer = NA
-      )
-    ),
+    shinymvu_dep(),
+    alpine_dep(),
+    mvu_bridge_js(component, extra_js = extra_js, extra_channels = extra_channels),
     div(`x-data` = component, `x-cloak` = NA, ...)
   )
 }
 
-#' Generate Bridge JavaScript for the MVU Runtime
+#' Generate Bridge Configuration Script
 #'
-#' Creates a `<script>` tag that registers an Alpine.js component with
-#' Shiny message handlers. The bridge connects the client-side Alpine
-#' reactive model to the server-side MVU runtime loop.
+#' Creates a `<script>` tag that calls `shinymvu.register()` with
+#' per-component configuration. The static bridge logic lives in
+#' `inst/www/shinymvu/bridge.js` and is loaded via an `htmlDependency`.
 #'
 #' @param component Character string naming the Alpine.js component.
 #' @param extra_js Optional JavaScript string for additional component
@@ -52,44 +47,48 @@ mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
   model_channel <- paste0(component, "__model")
   msg_id <- paste0(component, "__msg")
 
-  extra_handlers <- ""
+  config_parts <- c(
+    sprintf('name: "%s"', js_name),
+    sprintf('modelChannel: "%s"', model_channel),
+    sprintf('msgId: "%s"', msg_id)
+  )
+
   if (!is.null(extra_channels)) {
-    extra_handlers <- paste(vapply(names(extra_channels), function(ch) {
-      sprintf(
-        'Shiny.addCustomMessageHandler("%s", function(data) { %s });',
-        ch, extra_channels[[ch]]
-      )
-    }, character(1)), collapse = "\n")
+    handler_entries <- vapply(names(extra_channels), function(ch) {
+      sprintf('"%s": function(data) { %s }', ch, extra_channels[[ch]])
+    }, character(1))
+    config_parts <- c(
+      config_parts,
+      sprintf("handlers: {%s}", paste(handler_entries, collapse = ", "))
+    )
   }
 
-  js <- sprintf(
-    '
-    document.addEventListener("alpine:init", function() {
-      Alpine.data("%s", function() {
-        return {
-          model: {},
-          init: function() {
-            var self = this;
-            Shiny.addCustomMessageHandler("%s", function(data) {
-              self.model = data;
-            });
-            %s
-          },
-          send: function(type, value) {
-            Shiny.setInputValue("%s",
-              { type: type, value: value === undefined ? null : value },
-              { priority: "event" }
-            );
-          },
-          shinySet: function(name) {
-            Shiny.setInputValue(name, Date.now(), { priority: "event" });
-          }
-          %s
-        };
-      });
-    });
-  ', js_name, model_channel, extra_handlers, msg_id,
-    if (!is.null(extra_js)) paste0(",\n", extra_js) else ""
+  if (!is.null(extra_js)) {
+    config_parts <- c(config_parts, sprintf("extend: {%s}", extra_js))
+  }
+
+  config_js <- paste(config_parts, collapse = ", ")
+  tags$script(HTML(sprintf("shinymvu.register({%s});", config_js)))
+}
+
+# -- Internal: htmlDependency objects ------------------------------------------
+
+shinymvu_dep <- function() {
+  htmltools::htmlDependency(
+    name = "shinymvu",
+    version = as.character(utils::packageVersion("shinymvu")),
+    package = "shinymvu",
+    src = "www/shinymvu",
+    script = "bridge.js",
+    stylesheet = "shinymvu.css"
   )
-  tags$script(HTML(js))
+}
+
+alpine_dep <- function() {
+  htmltools::htmlDependency(
+    name = "alpinejs",
+    version = "3",
+    src = c(href = "https://cdn.jsdelivr.net/npm/alpinejs@3/dist"),
+    script = list(src = "cdn.min.js", defer = NA)
+  )
 }

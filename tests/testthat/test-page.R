@@ -4,10 +4,10 @@ test_that("mvu_bridge_js generates a script tag", {
   expect_equal(js$name, "script")
 })
 
-test_that("mvu_bridge_js includes component name", {
+test_that("mvu_bridge_js calls shinymvu.register", {
   js <- mvu_bridge_js("mycomp")
   html <- as.character(js)
-  expect_match(html, "mycomp")
+  expect_match(html, "shinymvu\\.register")
 })
 
 test_that("mvu_bridge_js includes correct channel names", {
@@ -17,31 +17,39 @@ test_that("mvu_bridge_js includes correct channel names", {
   expect_match(html, "app__msg")
 })
 
-test_that("mvu_bridge_js includes extra_js", {
+test_that("mvu_bridge_js includes extra_js as extend", {
   js <- mvu_bridge_js(extra_js = "customProp: 42")
   html <- as.character(js)
+  expect_match(html, "extend:")
   expect_match(html, "customProp: 42")
 })
 
-test_that("mvu_bridge_js includes extra_channels", {
+test_that("mvu_bridge_js includes extra_channels as handlers", {
   js <- mvu_bridge_js(extra_channels = list(
     clipboard = "navigator.clipboard.writeText(data);"
   ))
   html <- as.character(js)
+  expect_match(html, "handlers:")
   expect_match(html, "clipboard")
   expect_match(html, "navigator.clipboard.writeText")
 })
 
-test_that("mvu_bridge_js registers Alpine.data component", {
+test_that("mvu_bridge_js includes component name in config", {
   js <- mvu_bridge_js("counter")
   html <- as.character(js)
-  expect_match(html, 'Alpine\\.data\\("counter"')
+  expect_match(html, '"counter"')
 })
 
-test_that("mvu_bridge_js registers send function", {
-  js <- mvu_bridge_js()
-  html <- as.character(js)
-  expect_match(html, "send: function\\(type, value\\)")
+test_that("shinymvu_dep returns an htmlDependency", {
+  dep <- shinymvu_dep()
+  expect_s3_class(dep, "html_dependency")
+  expect_equal(dep$name, "shinymvu")
+})
+
+test_that("alpine_dep returns an htmlDependency", {
+  dep <- alpine_dep()
+  expect_s3_class(dep, "html_dependency")
+  expect_equal(dep$name, "alpinejs")
 })
 
 test_that("mvu_page wraps content in x-data container", {

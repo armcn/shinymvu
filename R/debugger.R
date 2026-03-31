@@ -1,288 +1,3 @@
-debugger_css <- function() {
-  "
-  .mvu-dbg {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    z-index: 99999;
-    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .mvu-dbg-tab {
-    position: absolute;
-    bottom: 0;
-    right: 20px;
-    background: #1a1b26;
-    color: #a9b1d6;
-    padding: 5px 14px;
-    border: none;
-    border-radius: 6px 6px 0 0;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.3px;
-  }
-
-  .mvu-dbg-tab:hover { background: #24283b; }
-
-  .mvu-dbg-badge {
-    background: #7aa2f7;
-    color: #1a1b26;
-    border-radius: 9px;
-    padding: 1px 7px;
-    font-weight: 700;
-    font-size: 10px;
-  }
-
-  .mvu-dbg-panel {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 360px;
-    max-height: 520px;
-    background: #1a1b26;
-    color: #a9b1d6;
-    border-radius: 8px 0 0 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: -4px -4px 20px rgba(0, 0, 0, 0.4);
-  }
-
-  .mvu-dbg-header {
-    padding: 6px 10px;
-    border-bottom: 1px solid #292e42;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .mvu-dbg-nav {
-    margin-right: auto;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .mvu-dbg-nav-btn {
-    background: none;
-    border: 1px solid #292e42;
-    border-radius: 3px;
-    color: #a9b1d6;
-    cursor: pointer;
-    font-size: 13px;
-    padding: 1px 6px;
-    font-family: inherit;
-    line-height: 1;
-  }
-
-  .mvu-dbg-nav-btn:hover {
-    background: #24283b;
-    border-color: #7aa2f7;
-  }
-
-  .mvu-dbg-nav-btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
-
-  .mvu-dbg-nav-btn:disabled:hover {
-    background: none;
-    border-color: #292e42;
-  }
-
-  .mvu-dbg-nav-label {
-    color: #565f89;
-    font-size: 10px;
-    padding: 0 4px;
-    min-width: 40px;
-    text-align: center;
-  }
-
-  .mvu-dbg-close {
-    background: none;
-    border: none;
-    color: #565f89;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0 4px;
-    line-height: 1;
-  }
-
-  .mvu-dbg-close:hover { color: #a9b1d6; }
-
-  .mvu-dbg-resume {
-    background: #9ece6a;
-    color: #1a1b26;
-    border: none;
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .mvu-dbg-resume:hover { background: #73daca; }
-
-  .mvu-dbg-action {
-    background: none;
-    border: 1px solid #292e42;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 10px;
-    color: #7aa2f7;
-    cursor: pointer;
-    font-family: inherit;
-  }
-
-  .mvu-dbg-action:hover {
-    background: #24283b;
-    border-color: #7aa2f7;
-  }
-
-  .mvu-dbg-list {
-    overflow-y: auto;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .mvu-dbg-item {
-    padding: 5px 12px;
-    cursor: pointer;
-    border-left: 3px solid transparent;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.1s;
-  }
-
-  .mvu-dbg-item:hover { background: #24283b; }
-
-  .mvu-dbg-item-current {
-    border-left-color: #7aa2f7;
-    background: #24283b;
-  }
-
-  .mvu-dbg-item-future { opacity: 0.35; }
-
-  .mvu-dbg-type { color: #c0caf5; }
-
-  .mvu-dbg-value {
-    color: #565f89;
-    font-size: 11px;
-    margin-left: 8px;
-  }
-
-  .mvu-dbg-init {
-    color: #565f89;
-    font-style: italic;
-  }
-
-  .mvu-dbg-empty {
-    padding: 20px 16px;
-    color: #565f89;
-    text-align: center;
-  }
-
-  .mvu-dbg-model-section {
-    border-top: 1px solid #292e42;
-    flex-shrink: 0;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .mvu-dbg-model-wrap {
-    padding: 8px 12px;
-  }
-
-  .mvu-dbg-step-label {
-    color: #565f89;
-    font-size: 10px;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .mvu-dbg-node > summary {
-    cursor: pointer;
-    list-style: none;
-    padding: 1px 0;
-  }
-
-  .mvu-dbg-node > summary::-webkit-details-marker { display: none; }
-
-  .mvu-dbg-node > summary::before {
-    content: '\\25b6';
-    display: inline-block;
-    width: 12px;
-    font-size: 8px;
-    color: #565f89;
-    transition: transform 0.1s;
-  }
-
-  .mvu-dbg-node[open] > summary::before {
-    transform: rotate(90deg);
-  }
-
-  .mvu-dbg-children {
-    padding-left: 14px;
-    border-left: 1px solid #292e42;
-    margin-left: 4px;
-  }
-
-  .mvu-dbg-key { color: #7aa2f7; }
-  .mvu-dbg-count { color: #565f89; font-size: 10px; margin-left: 4px; }
-
-  .mvu-dbg-leaf { padding: 1px 0; }
-  .mvu-dbg-str { color: #9ece6a; }
-  .mvu-dbg-num { color: #ff9e64; }
-  .mvu-dbg-bool { color: #bb9af7; }
-  .mvu-dbg-null { color: #565f89; font-style: italic; }
-  "
-}
-
-debugger_js <- function() {
-  "
-  if (!window.mvuDbgToggle) {
-    window.mvuDbgToggle = function(panelId, tabId) {
-      var panel = document.getElementById(panelId);
-      var tab = document.getElementById(tabId);
-      if (panel.style.display === 'none' || panel.style.display === '') {
-        panel.style.display = 'flex';
-        tab.style.display = 'none';
-      } else {
-        panel.style.display = 'none';
-        tab.style.display = 'flex';
-      }
-    };
-  }
-  if (!window.mvuDbgImport) {
-    window.mvuDbgImport = function(fileId, inputId) {
-      var el = document.getElementById(fileId);
-      el.onchange = function() {
-        var file = el.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          Shiny.setInputValue(inputId, e.target.result, {priority: 'event'});
-        };
-        reader.readAsText(file);
-        el.value = '';
-      };
-      el.click();
-    };
-  }
-  "
-}
-
 format_leaf_value <- function(x) {
   if (is.null(x)) {
     "null"
@@ -383,14 +98,13 @@ debugger_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    tags$style(HTML(debugger_css())),
-    tags$script(HTML(debugger_js())),
+    debugger_dep(),
     div(
       class = "mvu-dbg",
       tags$button(
         id = ns("tab"),
         class = "mvu-dbg-tab",
-        onclick = sprintf("mvuDbgToggle('%s','%s')", ns("panel"), ns("tab")),
+        onclick = sprintf("shinymvu.toggleDebugger('%s','%s')", ns("panel"), ns("tab")),
         tags$span("shinymvu"),
         shiny::uiOutput(ns("badge"), inline = TRUE)
       ),
@@ -405,7 +119,7 @@ debugger_ui <- function(id) {
           tags$button(
             class = "mvu-dbg-action",
             onclick = sprintf(
-              "mvuDbgImport('%s','%s')", ns("import_file"), ns("import_data")
+              "shinymvu.importSession('%s','%s')", ns("import_file"), ns("import_data")
             ),
             "Import"
           ),
@@ -416,7 +130,7 @@ debugger_ui <- function(id) {
           tags$button(
             class = "mvu-dbg-close",
             onclick = sprintf(
-              "mvuDbgToggle('%s','%s')", ns("panel"), ns("tab")
+              "shinymvu.toggleDebugger('%s','%s')", ns("panel"), ns("tab")
             ),
             "\u00d7"
           ),
@@ -675,4 +389,17 @@ debugger_server <- function(id, runtime, init) {
     shiny::outputOptions(output, "model_view", suspendWhenHidden = FALSE)
     shiny::outputOptions(output, "nav", suspendWhenHidden = FALSE)
   })
+}
+
+# -- Internal: htmlDependency -------------------------------------------------
+
+debugger_dep <- function() {
+  htmltools::htmlDependency(
+    name = "shinymvu-debugger",
+    version = as.character(utils::packageVersion("shinymvu")),
+    package = "shinymvu",
+    src = "www/shinymvu",
+    script = "debugger.js",
+    stylesheet = "debugger.css"
+  )
 }
