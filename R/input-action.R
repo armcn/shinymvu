@@ -1,7 +1,7 @@
 mvu_action_button <- function(label = NULL, icon = NULL, width = NULL, ...) {
   icon <- if (!is.null(icon)) {
     shiny::tags$span(
-      icon,
+      validate_icon(icon),
       class = "action-icon",
       .noWS = c("outside", "inside")
     )
@@ -24,20 +24,4 @@ mvu_action_button <- function(label = NULL, icon = NULL, width = NULL, ...) {
     .noWS = "inside",
     ...
   )
-}
-
-validateIcon <- function(icon) {
-  if (length(icon) == 0) {
-    return(icon)
-  }
-  if (!isTagLike(icon)) {
-    rlang::warn(
-      c(
-        "It appears that a non-HTML value was provided to `icon`.",
-        i = "Try using a `shiny::icon()` (or an equivalent) to get an icon."
-      ),
-      class = "shiny-validate-icon"
-    )
-  }
-  icon
 }
