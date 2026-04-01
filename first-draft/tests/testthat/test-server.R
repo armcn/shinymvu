@@ -64,60 +64,6 @@ test_that("mvu_module_server updates model on message", {
   )
 })
 
-test_that("mvu_module_server on_msg can intercept messages", {
-  intercepted <- NULL
-  init <- function() list(count = 0)
-  update <- function(model, msg, value) {
-    switch(msg,
-      increment = list_set(model, count = model$count + 1),
-      model
-    )
-  }
-  to_frontend <- function(model) model
-
-  on_msg <- function(model, type, value, session) {
-    intercepted <<- type
-    TRUE
-  }
-
-  shiny::testServer(
-    mvu_module_server,
-    args = list(
-      init = init, update = update, to_frontend = to_frontend,
-      on_msg = on_msg
-    ),
-    {
-      session$setInputs(mvu__msg = list(type = "increment", value = NULL))
-      expect_equal(intercepted, "increment")
-    }
-  )
-})
-
-test_that("mvu_module_server on_msg returning FALSE skips update", {
-  init <- function() list(count = 0)
-  update <- function(model, msg, value) {
-    list_set(model, count = model$count + 1)
-  }
-  to_frontend <- function(model) model
-
-  on_msg <- function(model, type, value, session) {
-    FALSE
-  }
-
-  shiny::testServer(
-    mvu_module_server,
-    args = list(
-      init = init, update = update, to_frontend = to_frontend,
-      on_msg = on_msg
-    ),
-    {
-      model <- session$getReturned()
-      session$setInputs(mvu__msg = list(type = "anything", value = NULL))
-      expect_equal(model()$count, 0)
-    }
-  )
-})
-
 test_that("mvu_module_server msg parameter auto-converts strings to enum", {
   check_msg <- mvu_enum(c("increment", "decrement"))
   init <- function() list(count = 0)

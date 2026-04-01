@@ -52,22 +52,3 @@ test_that("alpine_dep returns an htmlDependency", {
   expect_equal(dep$name, "alpinejs")
 })
 
-test_that("mvu_page wraps content in x-data container", {
-  page <- mvu_page(shiny::tags$p("hello"))
-  html <- as.character(page)
-  expect_match(html, 'x-data="mvu"')
-  expect_match(html, "x-cloak")
-  expect_match(html, "hello")
-})
-
-test_that("mvu_page uses custom component name", {
-  page <- mvu_page(shiny::tags$p("test"), component = "myapp")
-  html <- as.character(page)
-  expect_match(html, 'x-data="myapp"')
-})
-
-test_that("mvu_page returns bslib page structure", {
-  page <- mvu_page(shiny::tags$p("content"))
-  html <- as.character(page)
-  expect_match(html, "bslib-page-fill")
-})

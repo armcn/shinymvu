@@ -11,7 +11,6 @@ mvu_module_server(
   msg = NULL,
   to_frontend = identity,
   component = "mvu",
-  on_msg = NULL,
   debug = FALSE,
   subscriptions = NULL
 )
@@ -36,9 +35,6 @@ which sends the model as-is.}
 
 \item{component}{Character string naming the Alpine.js component. Must
 match the \code{component} argument in \code{\link[=mvu_module_ui]{mvu_module_ui()}}.}
-
-\item{on_msg}{[Deprecated] Optional message hook. Use \code{\link[=mvu_result]{mvu_result()}}
-with effect constructors instead.}
 
 \item{debug}{Logical. When \code{TRUE}, every transition is recorded and the
 built-in time-travel debugger overlay is injected into the page. The

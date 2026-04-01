@@ -10,7 +10,6 @@ mvu_server(
   msg = NULL,
   to_frontend = identity,
   component = "mvu",
-  on_msg = NULL,
   debug = FALSE,
   subscriptions = NULL,
   input,
@@ -30,10 +29,11 @@ mvu_server(
 
 \item{component}{Alpine.js component name.}
 
-\item{on_msg}{Deprecated message hook.}
-
 \item{debug}{Logical. When \code{TRUE}, records transitions and injects the
 time-travel debugger.}
+
+\item{subscriptions}{A function returning a named list of reactive
+expressions.}
 
 \item{input, output, session}{Shiny session objects.}
 

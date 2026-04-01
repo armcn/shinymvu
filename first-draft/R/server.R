@@ -8,9 +8,10 @@
 #' @param msg An optional enum factory created by [mvu_enum()].
 #' @param to_frontend A function projecting the model for the client.
 #' @param component Alpine.js component name.
-#' @param on_msg Deprecated message hook.
 #' @param debug Logical. When `TRUE`, records transitions and injects the
 #'   time-travel debugger.
+#' @param subscriptions A function returning a named list of reactive
+#'   expressions.
 #' @param input,output,session Shiny session objects.
 #' @param .channel_component Internal channel name override.
 #'
@@ -19,7 +20,7 @@
 #'
 #' @keywords internal
 mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
-                       component = "mvu", on_msg = NULL, debug = FALSE,
+                       component = "mvu", debug = FALSE,
                        subscriptions = NULL,
                        input, output, session,
                        .channel_component = component) {
@@ -89,14 +90,6 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
 
   observeEvent(input[[msg_input]], {
     raw <- input[[msg_input]]
-
-    if (!is.null(on_msg)) {
-      proceed <- on_msg(model, raw$type, raw$value, session)
-      if (isFALSE(proceed)) {
-        return()
-      }
-    }
-
     dispatch(raw$type, raw$value)
   })
 

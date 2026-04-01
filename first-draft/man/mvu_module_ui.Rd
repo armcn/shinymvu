@@ -8,7 +8,6 @@ mvu_module_ui(
   id,
   ...,
   component = "mvu",
-  theme = bslib::bs_theme(),
   extra_js = NULL,
   extra_channels = NULL
 )
@@ -20,8 +19,6 @@ mvu_module_ui(
 
 \item{component}{Character string naming the Alpine.js component. Defaults
 to \code{"mvu"}.}
-
-\item{theme}{A \code{\link[bslib:bs_theme]{bslib::bs_theme()}} object for Bootstrap theming.}
 
 \item{extra_js}{Optional JavaScript string for additional Alpine.js
 component properties.}

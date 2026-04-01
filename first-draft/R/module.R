@@ -8,7 +8,6 @@
 #' @param ... UI elements to include inside the Alpine.js `x-data` container.
 #' @param component Character string naming the Alpine.js component. Defaults
 #'   to `"mvu"`.
-#' @param theme A [bslib::bs_theme()] object for Bootstrap theming.
 #' @param extra_js Optional JavaScript string for additional Alpine.js
 #'   component properties.
 #' @param extra_channels A named list of additional Shiny custom message
@@ -29,7 +28,6 @@
 #'
 #' @export
 mvu_module_ui <- function(id, ..., component = "mvu",
-                          theme = bslib::bs_theme(),
                           extra_js = NULL, extra_channels = NULL) {
   ns <- NS(id)
   comp_id <- ns(component)
@@ -61,8 +59,6 @@ mvu_module_ui <- function(id, ..., component = "mvu",
 #'   which sends the model as-is.
 #' @param component Character string naming the Alpine.js component. Must
 #'   match the `component` argument in [mvu_module_ui()].
-#' @param on_msg \[Deprecated\] Optional message hook. Use [mvu_result()]
-#'   with effect constructors instead.
 #' @param debug Logical. When `TRUE`, every transition is recorded and the
 #'   built-in time-travel debugger overlay is injected into the page. The
 #'   return value changes to a list with `$model` (reactiveVal), `$log`
@@ -91,14 +87,14 @@ mvu_module_ui <- function(id, ..., component = "mvu",
 #' @export
 mvu_module_server <- function(id, init, update, msg = NULL,
                               to_frontend = identity,
-                              component = "mvu", on_msg = NULL,
+                              component = "mvu",
                               debug = FALSE, subscriptions = NULL) {
   moduleServer(id, function(input, output, session) {
     comp_id <- session$ns(component)
     mvu_server(
       init = init, update = update, msg = msg,
       to_frontend = to_frontend,
-      component = component, on_msg = on_msg,
+      component = component,
       debug = debug, subscriptions = subscriptions,
       input = input, output = output, session = session,
       .channel_component = comp_id

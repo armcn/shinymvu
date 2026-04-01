@@ -7,8 +7,7 @@
 * Added `debug` parameter to `mvu_module_server()` for built-in time-travel
   debugging with model inspection, import/export, and step navigation.
 * Simplified API to module-only: `mvu_module_ui()` and `mvu_module_server()`
-  are now the only public entry points. `mvu_page()` and `mvu_server()` are
-  internal.
+  are the only public entry points.
 * `debug` only needs to be set in `mvu_module_server()`, not in the UI.
 * Added comprehensive guide vignette.
 
