@@ -52,8 +52,8 @@ init <- function() list(count = 0)
 update <- function(model, msg, value) {
   switch(
     msg,
-    increment = list_set(model, count = model$count + 1),
-    decrement = list_set(model, count = model$count - 1)
+    increment = purrr::list_assign(model, count = model$count + 1),
+    decrement = purrr::list_assign(model, count = model$count - 1)
   )
 }
 

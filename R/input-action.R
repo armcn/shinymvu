@@ -1,3 +1,4 @@
+#' @export
 mvu_action_button <- function(label = NULL, icon = NULL, width = NULL, ...) {
   icon <- if (!is.null(icon)) {
     tags$span(

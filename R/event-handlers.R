@@ -1,3 +1,4 @@
+#' @export
 on_click <- function(tag, msg) {
   htmltools::tagAppendAttributes(tag, `@click` = send_msg(msg))
 }

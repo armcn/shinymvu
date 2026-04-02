@@ -1,3 +1,4 @@
+#' @export
 mvu_module_ui <- function(id, ...) {
   ns <- NS(id)
   config <- make_alpine_config(ns)
@@ -10,6 +11,7 @@ mvu_module_ui <- function(id, ...) {
   )
 }
 
+#' @export
 mvu_module_server <- function(id, init, update) {
   moduleServer(id, \(input, output, session) {
     ns <- session$ns

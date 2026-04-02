@@ -1,5 +1,5 @@
 library(shiny)
-pkgload::load_all()
+library(shinymvu)
 
 init <- function() list(count = 0)
 
