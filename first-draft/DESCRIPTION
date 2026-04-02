@@ -23,6 +23,7 @@ Imports:
     htmltools,
     jsonlite,
     promises,
+    purrr,
     rlang,
     shiny (>= 1.7.0)
 Suggests: 

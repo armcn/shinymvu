@@ -30,11 +30,11 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
   model <- reactiveVal(init())
 
   push <- function() {
-    session$sendCustomMessage(model_channel, to_frontend(model()))
+    session$sendCustomMessage(model_channel, prepare_model(to_frontend(model())))
   }
 
   session$onFlushed(function() {
-    session$sendCustomMessage(model_channel, to_frontend(isolate(model())))
+    session$sendCustomMessage(model_channel, prepare_model(to_frontend(isolate(model()))))
   })
 
   observe({
@@ -121,7 +121,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
 
       is_traveling(TRUE)
       session$sendCustomMessage(
-        model_channel, to_frontend(cached_models[[step + 1L]])
+        model_channel, prepare_model(to_frontend(cached_models[[step + 1L]]))
       )
     }
 
@@ -129,7 +129,7 @@ mvu_server <- function(init, update, msg = NULL, to_frontend = identity,
       is_traveling(FALSE)
       cached_models <<- NULL
       session$sendCustomMessage(
-        model_channel, to_frontend(isolate(model()))
+        model_channel, prepare_model(to_frontend(isolate(model())))
       )
     }
 
