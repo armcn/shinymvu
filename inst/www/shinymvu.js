@@ -3,24 +3,23 @@
 
   window.shinymvu = {};
 
-  shinymvu.register = function () {
+  shinymvu.register = function (config) {
     document.addEventListener("alpine:init", function () {
-      Alpine.data("module", function () {
+      Alpine.data(config.component, function () {
         return {
           model: {},
           init: function () {
             var self = this;
-            Shiny.addCustomMessageHandler("model_channel", function (data) {
-              self.model = data;
-            });
+            Shiny.addCustomMessageHandler(
+              config.model_channel,
+              function (data) { self.model = data; }
+            );
           },
           send: function (msg) {
-            Shiny.setInputValue("counter-msg", msg, { priority: "event" })
+            Shiny.setInputValue(config.msg_id, msg, { priority: "event" })
           }
         };
       });
     });
   };
-
-  shinymvu.register();
 })();
