@@ -27,6 +27,8 @@ mvu_module_server <- function(id, init, update) {
         model()
     }) |>
       bindEvent(input$msg_id)
+
+    return(model)
   })
 }
 
