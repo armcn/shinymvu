@@ -1,6 +1,6 @@
 Package: shinymvu
 Title: The Elm Architecture for Shiny Applications
-Version: 0.0.0.9000
+Version: 0.0.0.9003
 Authors@R: 
     person("Andrew", "McNeil", role = c("aut", "cre"),
            email = "andrew.richard.mcneil@gmail.com")

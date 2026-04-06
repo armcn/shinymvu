@@ -55,7 +55,7 @@ model_tree_html <- function(obj, name = NULL) {
     }
 
     tags$details(
-      open = NA, class = "mvu-dbg-node",
+      class = "mvu-dbg-node",
       tags$summary(
         tags$span(class = "mvu-dbg-key", label),
         tags$span(class = "mvu-dbg-count", count_str)
@@ -128,6 +128,12 @@ debugger_ui <- function(id) {
             style = "text-decoration: none;"
           ),
           tags$button(
+            id = ns("expand_btn"),
+            class = "mvu-dbg-action",
+            onclick = sprintf("shinymvu.expandDebugger('%s','%s')", ns("panel"), ns("expand_btn")),
+            "Expand"
+          ),
+          tags$button(
             class = "mvu-dbg-close",
             onclick = sprintf(
               "shinymvu.toggleDebugger('%s','%s')", ns("panel"), ns("tab")
@@ -140,13 +146,21 @@ debugger_ui <- function(id) {
           )
         ),
         div(
-          class = "mvu-dbg-list",
-          shiny::uiOutput(ns("msg_list"))
+          class = "mvu-dbg-body",
+          div(
+            class = "mvu-dbg-list",
+            shiny::uiOutput(ns("msg_list"))
+          ),
+          div(
+            id = ns("model_section"),
+            class = "mvu-dbg-model-section",
+            shiny::uiOutput(ns("model_view"))
+          )
         ),
-        div(
-          class = "mvu-dbg-model-section",
-          shiny::uiOutput(ns("model_view"))
-        )
+        tags$script(sprintf(
+          "setTimeout(function(){shinymvu.initModelPersistence('%s');},0);",
+          ns("model_section")
+        ))
       )
     )
   )

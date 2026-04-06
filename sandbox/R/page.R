@@ -15,32 +15,37 @@
 #' @keywords internal
 mvu_bridge_js <- function(component = "mvu", extra_js = NULL,
                           extra_channels = NULL) {
-  js_name <- gsub("-", "_", component)
-  model_channel <- paste0(component, "__model")
-  msg_id <- paste0(component, "__msg")
+  config <- make_alpine_config(component)
 
-  config_parts <- c(
-    sprintf('name: "%s"', js_name),
-    sprintf('modelChannel: "%s"', model_channel),
-    sprintf('msgId: "%s"', msg_id)
-  )
+  extras <- character(0)
 
   if (!is.null(extra_channels)) {
     handler_entries <- vapply(names(extra_channels), function(ch) {
       sprintf('"%s": function(data) { %s }', ch, extra_channels[[ch]])
     }, character(1))
-    config_parts <- c(
-      config_parts,
-      sprintf("handlers: {%s}", paste(handler_entries, collapse = ", "))
-    )
+    extras <- c(extras, sprintf('"handlers": {%s}', paste(handler_entries, collapse = ", ")))
   }
 
   if (!is.null(extra_js)) {
-    config_parts <- c(config_parts, sprintf("extend: {%s}", extra_js))
+    extras <- c(extras, sprintf('"extend": {%s}', extra_js))
   }
 
-  config_js <- paste(config_parts, collapse = ", ")
-  tags$script(HTML(sprintf("shinymvu.register({%s});", config_js)))
+  config_json <- jsonlite::toJSON(config, auto_unbox = TRUE)
+
+  if (length(extras) > 0) {
+    extras_str <- paste(extras, collapse = ", ")
+    config_json <- sub("\\}$", paste0(", ", extras_str, "}"), config_json)
+  }
+
+  tags$script(HTML(paste0("shinymvu.register(", config_json, ");")))
+}
+
+make_alpine_config <- function(component) {
+  list(
+    component = gsub("-", "_", component),
+    model_channel = paste0(component, "__model"),
+    msg_id = paste0(component, "__msg")
+  )
 }
 
 # -- Internal: htmlDependency objects ------------------------------------------

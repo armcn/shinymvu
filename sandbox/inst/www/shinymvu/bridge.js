@@ -10,18 +10,18 @@
   }
 
   function createComponent(config) {
-    var component = {
+    var comp = {
       model: {},
       init: function () {
         var self = this;
-        Shiny.addCustomMessageHandler(config.modelChannel, function (data) {
+        Shiny.addCustomMessageHandler(config.model_channel, function (data) {
           self.model = data;
         });
         if (config.handlers) registerHandlers(config.handlers);
       },
       send: function (type, value) {
         Shiny.setInputValue(
-          config.msgId,
+          config.msg_id,
           { type: type, value: value === undefined ? null : value },
           { priority: "event" }
         );
@@ -30,12 +30,12 @@
         Shiny.setInputValue(name, Date.now(), { priority: "event" });
       }
     };
-    return config.extend ? Object.assign(component, config.extend) : component;
+    return config.extend ? Object.assign(comp, config.extend) : comp;
   }
 
   shinymvu.register = function (config) {
     document.addEventListener("alpine:init", function () {
-      Alpine.data(config.name, function () {
+      Alpine.data(config.component, function () {
         return createComponent(config);
       });
     });

@@ -20,7 +20,7 @@ test_that("mvu_bridge_js includes correct channel names", {
 test_that("mvu_bridge_js includes extra_js as extend", {
   js <- mvu_bridge_js(extra_js = "customProp: 42")
   html <- as.character(js)
-  expect_match(html, "extend:")
+  expect_match(html, '"extend"')
   expect_match(html, "customProp: 42")
 })
 
@@ -29,7 +29,7 @@ test_that("mvu_bridge_js includes extra_channels as handlers", {
     clipboard = "navigator.clipboard.writeText(data);"
   ))
   html <- as.character(js)
-  expect_match(html, "handlers:")
+  expect_match(html, '"handlers"')
   expect_match(html, "clipboard")
   expect_match(html, "navigator.clipboard.writeText")
 })
